@@ -30,7 +30,8 @@ namespace Rv
     //  CGDesktopVideoDevice)
     //
 
-    class CGDesktopVideoDeviceArm : public DesktopVideoDevice
+    class CGDesktopVideoDeviceArm
+        : public DesktopVideoDevice // public TwkGLF::GLVideoDevice
     {
     public:
         class Mode
@@ -41,6 +42,7 @@ namespace Rv
             int32_t width = 0;
             int32_t height = 0;
             double refreshRate = 0;
+            int32_t videoFormatIndex = -1;
             CGDirectDisplayID cgScreen = 0;
             std::string description;
             bool isGUI = false;
@@ -67,15 +69,21 @@ namespace Rv
         //
         //  VideoDevice API
         //
-
         virtual Resolution resolution() const;
         virtual Offset offset() const;
         virtual Timing timing() const;
         virtual VideoFormat format() const;
-
         virtual size_t width() const;
         virtual size_t height() const;
         virtual float pixelScale() const;
+
+        // GLVideoDevice API
+        virtual std::string hardwareIdentification() const;
+        //        virtual size_t width() const;
+        //        virtual size_t height() const;
+        //        virtual void makeCurrent() const;
+        virtual void redraw() const;
+        virtual void redrawImmediately() const;
 
         virtual void open(const StringVector&);
         virtual void close();
@@ -105,10 +113,15 @@ namespace Rv
         // private helpers
         static std::vector<CGDesktopVideoDeviceArm::Display> getDisplays();
         static CGDisplayModeRef
-        displayModeRefFromIoModeId(CGDesktopVideoDeviceArm::Mode mode);
-        static bool switchToMode(CGDesktopVideoDeviceArm::Mode mode,
+        displayModeRefFromIoModeId(CGDirectDisplayID cgScreen,
+                                   int32_t ioModeId);
+        static bool switchToMode(const CGDesktopVideoDeviceArm::Mode& mode,
                                  QRect& bounds);
         static int32_t qtScreenFromCG(CGDirectDisplayID cgScreen);
+        static CGDesktopVideoDeviceArm::Mode
+        constructModeFromDisplayModeRef(CGDirectDisplayID cgScreen,
+                                        CGDisplayModeRef modeRef);
+
         static std::vector<CGDesktopVideoDeviceArm::Mode>
         getDisplayModes(CGDirectDisplayID screen);
         static QRect cgScreenBounds(CGDirectDisplayID cgScreen);
