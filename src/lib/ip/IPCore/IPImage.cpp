@@ -313,8 +313,6 @@ namespace IPCore
             blendMode = IPImage::Add;
         else if (!strcmp(blendModeString, "difference"))
             blendMode = IPImage::Difference;
-        else if (!strcmp(blendModeString, "-difference"))
-            blendMode = IPImage::ReverseDifference;
         else if (!strcmp(blendModeString, "dissolve"))
             blendMode = IPImage::Dissolve;
         else if (!strcmp(blendModeString, "replace"))
@@ -1270,9 +1268,6 @@ namespace IPCore
             break;
         case IPImage::Difference:
             o << "d|";
-            break;
-        case IPImage::ReverseDifference:
-            o << "i|";
             break;
         case IPImage::Dissolve:
             o << "x|";

@@ -2061,7 +2061,6 @@ namespace IPCore
                 reverse = true;
                 break;
             case IPImage::Difference:
-            case IPImage::ReverseDifference:
                 dontBlendFirst = context.doBlend ? false : true;
                 reverse = true;
                 break;
@@ -2703,6 +2702,9 @@ namespace IPCore
             //
             //  Framebuffer modes
             //
+            // DIFFERENCE_KHR
+            // https://registry.khronos.org/OpenGL/extensions/KHR/KHR_blend_equation_advanced.txt
+            const int GL_DIFFERENCE_KHR = 0x929E;
 
             switch (context.blendMode)
             {
@@ -2722,14 +2724,10 @@ namespace IPCore
                 glBlendEquation(GL_FUNC_ADD);
                 glBlendFunc(GL_ONE, GL_ONE);
                 break;
-            case IPImage::Difference:
+            case IPImage::Difference: // abs(a-b) * slope. Unfortunately cannot
+                                      // use slope > 1 with absolute diff
                 glEnable(GL_BLEND);
-                glBlendEquation(GL_FUNC_SUBTRACT);
-                glBlendFunc(GL_ONE, GL_ONE);
-                break;
-            case IPImage::ReverseDifference:
-                glEnable(GL_BLEND);
-                glBlendEquation(GL_FUNC_REVERSE_SUBTRACT);
+                glBlendEquation(GL_DIFFERENCE_KHR); // Khronos extension
                 glBlendFunc(GL_ONE, GL_ONE);
                 break;
             }

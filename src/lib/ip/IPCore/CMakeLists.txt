@@ -137,6 +137,7 @@ SET(_shaders
     Replace4
     Difference2
     Difference3
+    Difference4
     ResizeDownSample
     ResizeDownSampleFast
     ResizeDownSampleDerivative
@@ -144,10 +145,6 @@ SET(_shaders
     ResizeUpSampleHorizontal
     ResizeUpSampleVerticalMitchell
     ResizeUpSampleHorizontalMitchell
-    Difference4
-    ReverseDifference2
-    ReverseDifference3
-    ReverseDifference4
     InlineDissolve2
     ColorCDL_SAT_noClamp
     ColorPremultLight

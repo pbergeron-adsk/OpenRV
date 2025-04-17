@@ -168,7 +168,6 @@ namespace IPCore
             Over,
             Add,
             Difference,
-            ReverseDifference,
             Dissolve
         };
 

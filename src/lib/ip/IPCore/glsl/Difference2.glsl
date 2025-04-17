@@ -8,8 +8,10 @@
 
 vec4 main(const in vec4 i0, const in vec4 i1)
 {
-    return vec4(clamp(i0.r-i1.r, 0.0, 1.0),
-                clamp(i0.g-i1.g, 0.0, 1.0),
-                clamp(i0.b-i1.b, 0.0, 1.0),
-                clamp(i0.a-i1.a, 0.0, 1.0));
+    float slope = 1.0f;
+
+    return vec4(clamp(abs(i0.r-i1.r)*slope, 0.0, 1.0),
+                clamp(abs(i0.g-i1.g)*slope, 0.0, 1.0),
+                clamp(abs(i0.b-i1.b)*slope, 0.0, 1.0),
+                clamp(abs(i0.a-i1.a)*slope, 0.0, 1.0));
 }

@@ -127,9 +127,6 @@ extern const char* Add4_glsl;
 extern const char* Difference2_glsl;
 extern const char* Difference3_glsl;
 extern const char* Difference4_glsl;
-extern const char* ReverseDifference2_glsl;
-extern const char* ReverseDifference3_glsl;
-extern const char* ReverseDifference4_glsl;
 extern const char* InlineDissolve2_glsl;
 extern const char* BoxFilter_glsl;
 extern const char* ConstantBG_glsl;
@@ -317,7 +314,6 @@ namespace IPCore
         static Function* Shader_Over = 0;
         static Function* Shader_Add = 0;
         static Function* Shader_Difference = 0;
-        static Function* Shader_ReverseDifference = 0;
         static Function* Shader_InlineDissolve = 0;
         static Function* Shader_LensWarpRadial = 0;
         static Function* Shader_LensWarpTangential = 0;
@@ -2923,9 +2919,6 @@ namespace IPCore
         const char* addShaders[] = {Add2_glsl, Add3_glsl, Add4_glsl};
         const char* differenceShaders[] = {Difference2_glsl, Difference3_glsl,
                                            Difference4_glsl};
-        const char* reverseDifferenceShaders[] = {ReverseDifference2_glsl,
-                                                  ReverseDifference3_glsl,
-                                                  ReverseDifference4_glsl};
 
         // generate a blend expr of a certain mode
         // with the input Expressions as input to the blend shaders (over, add,
@@ -2956,11 +2949,6 @@ namespace IPCore
                 F = blend(
                     size, name,
                     differenceShaders[size - 2]); //*2_glsl is at position 0
-                break;
-            case IPImage::ReverseDifference:
-                F = blend(size, name,
-                          reverseDifferenceShaders[size - 2]); //*2_glsl is at
-                                                               // position 0
                 break;
             case IPImage::Replace:
                 F = blend(size, name,
