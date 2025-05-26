@@ -280,6 +280,7 @@ namespace IPCore
         , m_volume(0)
         , m_balance(0)
         , m_mute(0)
+        , m_mute_livereview(0)
         , m_audioSoftClamp(0)
         , m_frameCacheInvalid(false)
         , m_postFirstEval(false)
@@ -677,6 +678,9 @@ namespace IPCore
             "audio.balance");
         m_mute = m_viewGroupNode->soundtrackNode()->property<IntProperty>(
             "audio.mute");
+        m_mute_livereview =
+            m_viewGroupNode->soundtrackNode()->property<IntProperty>(
+                "audio.mute_livereview");
         m_audioSoftClamp =
             m_viewGroupNode->soundtrackNode()->property<IntProperty>(
                 "audio.softClamp");
@@ -3217,6 +3221,9 @@ IPGraph::findNodesByAbstractPath(int frame,
             b = -1.0f;
 
         if (m_mute->front())
+            v = 0.0f;
+
+        if (m_mute_livereview->front())
             v = 0.0f;
 
         const bool clamp = m_audioSoftClamp->front() != 0;

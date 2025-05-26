@@ -885,6 +885,7 @@ namespace IPCore
         FloatProperty* m_volume;
         FloatProperty* m_balance;
         IntProperty* m_mute;
+        IntProperty* m_mute_livereview;
         IntProperty* m_audioSoftClamp;
         FloatProperty* m_audioOffset;
         FloatProperty* m_audioOffset2;

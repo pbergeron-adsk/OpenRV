@@ -54,6 +54,8 @@ namespace IPCore
         m_internalOffset =
             declareProperty<FloatProperty>("audio.internalOffset", 0.0f);
         m_mute = declareProperty<IntProperty>("audio.mute", 0);
+        m_mute_livereview =
+            declareProperty<IntProperty>("audio.mute_livereview", 0);
         m_softClamp =
             declareProperty<IntProperty>("audio.softClamp", softClamp ? 1 : 0);
         m_visualWidth = declareProperty<IntProperty>("visual.width", 0);

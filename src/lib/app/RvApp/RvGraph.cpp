@@ -199,6 +199,9 @@ namespace Rv
             "audio.balance");
         m_mute = m_viewGroupNode->soundtrackNode()->property<IntProperty>(
             "audio.mute");
+        m_mute_livereview =
+            m_viewGroupNode->soundtrackNode()->property<IntProperty>(
+                "audio.mute_livereview");
         m_audioSoftClamp =
             m_viewGroupNode->soundtrackNode()->property<IntProperty>(
                 "audio.softClamp");

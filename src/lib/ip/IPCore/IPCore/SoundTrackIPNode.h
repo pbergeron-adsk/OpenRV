@@ -101,6 +101,7 @@ namespace IPCore
         FloatProperty* m_offset;
         FloatProperty* m_internalOffset;
         IntProperty* m_mute;
+        IntProperty* m_mute_livereview;
         IntProperty* m_softClamp;
         IntProperty* m_visualWidth;
         IntProperty* m_visualHeight;
