@@ -15,6 +15,50 @@ MenuStateFunc   := (int;);
 \: noop (void; Event ev) {;}
 \: disabledItem (int;) { DisabledMenuState; }
 
+//
+// Category-based action and menu state functions
+//
+\: nilStateFunc (int;) { return NeutralMenuState; }
+\: nilEventFunc (void; Event ev) {;}
+
+\: categoryState (MenuStateFunc; string category, MenuStateFunc stateFunc = nilStateFunc)
+{
+    \: (int;)
+    {
+        bool blocked = isBlockedActionCategory(category);
+        
+        if (blocked) 
+            return DisabledMenuState;
+        else 
+            return stateFunc();
+    };
+}
+
+\: categoryAction ((void;Event); string category, (void;Event) actionFunc = nilEventFunc)
+{
+    \: (void; Event ev)
+    {
+        if (isBlockedActionCategory(category)) {
+            sendInternalEvent("blocked-action-category");
+            return;
+        }
+        actionFunc(ev);
+    };
+}
+
+\: categoryAction ((void;Event); string category, (void;) actionFunc)
+{
+    \: (void; Event ev)
+    {
+        if (isBlockedActionCategory(category)) {
+            sendInternalEvent("blocked-action-category");
+            return;
+        }
+        actionFunc();
+    };
+}
+
+
 \: makeEventFunc (EventFunc; VoidFunc f) {
     //
     //  Note we don't reject the event here.  For obscure reasons it causes

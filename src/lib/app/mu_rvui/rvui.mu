@@ -78,38 +78,6 @@ global Configuration globalConfig =
 //  Utilities
 //
 
-//
-// Menuitem and bind() category checking functions
-//
-
-\: nilStateFunc (int;) { return NeutralMenuState; }
-\: nilEventFunc (void; Event ev) {;}
-
-\: categoryState (MenuStateFunc; string category, MenuStateFunc stateFunc = nilStateFunc)
-{
-    \: (int;)
-    {
-        bool blocked = isBlockedActionCategory(category);
-        
-        if (blocked) 
-            return DisabledMenuState;
-        else 
-            return stateFunc();
-    };
-}
-
-\: categoryAction ((void;Event); string category, (void;Event) actionFunc = nilEventFunc)
-{
-    \: (void; Event ev)
-    {
-        if (isBlockedActionCategory(category)) {
-            sendInternalEvent("blocked-action-category");
-            return;
-        }
-        actionFunc(ev);
-    };
-}
-
 
 \: makeStateFunc (MenuStateFunc; BoolFunc f)
 {
@@ -6320,120 +6288,120 @@ global bool debugGC = false;
     Menu a = {
         {"Stereo", Menu {
             {"Stereo Viewing Mode", nil, nil, inactiveState},
-            {"   Off", setStereo("off"), nil, isStereo("off")},
-            {"   Anaglyph", setStereo("anaglyph"), nil, isStereo("anaglyph")},
-            {"   Luminance Anaglyph", setStereo("lumanaglyph"), nil, isStereo("lumanaglyph")},
-            {"   Side-by-Side", setStereo("pair"), nil, isStereo("pair")},
-            {"   Mirror Side-by-Side", setStereo("mirror"), nil, isStereo("mirror")},
-            //{"   Horizontal Squeezed", setStereo("hsqueezed"), nil, isStereo("hsqueezed")},
-            //{"   Vertical Squeezed", setStereo("vsqueezed"), nil, isStereo("vsqueezed")},
-            {"   DLP Checker", setStereo("checker"), nil, isStereo("checker")},
-            {"   Scanline", setStereo("scanline"), nil, isStereo("scanline")},
-            {"   Left Eye Only", setStereo("left"), nil, isStereo("left")},
-            {"   Right Eye Only", setStereo("right"), nil, isStereo("right")},
-            {"   Shutter Glasses", setStereo("hardware"), nil, isStereo("hardware")},
+            {"   Off", setStereo("off"), nil, categoryState("", isStereo("off"))},
+            {"   Anaglyph", setStereo("anaglyph"), nil, categoryState("", isStereo("anaglyph"))},
+            {"   Luminance Anaglyph", setStereo("lumanaglyph"), nil, categoryState("", isStereo("lumanaglyph"))},
+            {"   Side-by-Side", setStereo("pair"), nil, categoryState("", isStereo("pair"))},
+            {"   Mirror Side-by-Side", setStereo("mirror"), nil, categoryState("", isStereo("mirror"))},
+            //{"   Horizontal Squeezed", setStereo("hsqueezed"), nil, categoryState("", isStereo("hsqueezed"))},
+            //{"   Vertical Squeezed", setStereo("vsqueezed"), nil, categoryState("", isStereo("vsqueezed"))},
+            {"   DLP Checker", setStereo("checker"), nil, categoryState("", isStereo("checker"))},
+            {"   Scanline", setStereo("scanline"), nil, categoryState("", isStereo("scanline"))},
+            {"   Left Eye Only", setStereo("left"), nil, categoryState("", isStereo("left"))},
+            {"   Right Eye Only", setStereo("right"), nil, categoryState("", isStereo("right"))},
+            {"   Shutter Glasses", setStereo("hardware"), nil, categoryState("", isStereo("hardware"))},
             {"_", nil},
-            {"Global Swap Eyes", ~toggleSwapEyes, nil, propToggledAndStereoOnState("@RVDisplayStereo.stereo.swap")},
-            {"Global Flip Right Eye", ~toggleRFlip, nil, propToggledAndStereoOnState("@RVDisplayStereo.rightTransform.flip")},
-            {"Global Flop Right Eye", ~toggleRFlop, nil, propToggledAndStereoOnState("@RVDisplayStereo.rightTransform.flop")},
+            {"Global Swap Eyes", ~toggleSwapEyes, nil, categoryState("", propToggledAndStereoOnState("@RVDisplayStereo.stereo.swap"))},
+            {"Global Flip Right Eye", ~toggleRFlip, nil, categoryState("", propToggledAndStereoOnState("@RVDisplayStereo.rightTransform.flip"))},
+            {"Global Flop Right Eye", ~toggleRFlop, nil, categoryState("", propToggledAndStereoOnState("@RVDisplayStereo.rightTransform.flop"))},
             {"_", nil},
             {"Interactive Edit",      nil, nil, inactiveState },
-            {"    Global Relative Eye Offset (%)", stereoOffsetMode, nil, eyeOffsetState},
-            {"    Global Right Eye Only Offset (%)", stereoROffsetMode, nil, eyeOffsetState},
+            {"    Global Relative Eye Offset (%)", stereoOffsetMode, nil, categoryState("", eyeOffsetState)},
+            {"    Global Right Eye Only Offset (%)", stereoROffsetMode, nil, categoryState("", eyeOffsetState)},
             {"_", nil},
-            {"Reset All Stereo Offsets", resetStereoOffsets, nil, eyeOffsetState},
+            {"Reset All Stereo Offsets", resetStereoOffsets, nil, categoryState("", eyeOffsetState)},
             }},
         //{"Renderer", Menu {
             //{"Composite", setToRenderer("Composite"), nil, isSetToRenderer("Composite")}
             //{"Direct", setToRenderer("Direct"), nil, isSetToRenderer("Direct")}
         //  }},
         {"_", nil},
-        {"Presentation Mode", ~togglePresentationMode, "control p", presentationModeState},
+        {"Presentation Mode", ~togglePresentationMode, "control p", categoryState("", presentationModeState)},
         {"Presentation Settings", Menu()},
         {"_", nil},
-        {"Frame",           ~frameImage,     "f", frameState},
-        {"Frame Width",     frameWidth,     "control f", frameState},
+        {"Frame",           ~frameImage,     "f", categoryState("", frameState)},
+        {"Frame Width",     frameWidth,     "control f", categoryState("", frameState)},
         {"_", nil},
         {"Linear to Display Correction", nil, nil, inactiveState},
-        {"   No Correction", setDispConvert(""), nil, hasDispConversion("")},
-        {"   sRGB", setDispConvert("sRGB"), nil, hasDispConversion("sRGB")},
-        {"   Rec709", setDispConvert("Rec709"), nil, hasDispConversion("Rec709")},
-        {"   Display Gamma 2.2", setDispConvert("Gamma 2.2"), nil, hasDispConversion("Gamma 2.2")},
-        {"   Display Gamma 2.4", setDispConvert("Gamma 2.4"), nil, hasDispConversion("Gamma 2.4")},
-        {"   Display Gamma...", enterDispGamma, "v", dispGammaState},
+        {"   No Correction", setDispConvert(""), nil, categoryState("", hasDispConversion(""))},
+        {"   sRGB", setDispConvert("sRGB"), nil, categoryState("", hasDispConversion("sRGB"))},
+        {"   Rec709", setDispConvert("Rec709"), nil, categoryState("", hasDispConversion("Rec709"))},
+        {"   Display Gamma 2.2", setDispConvert("Gamma 2.2"), nil, categoryState("", hasDispConversion("Gamma 2.2"))},
+        {"   Display Gamma 2.4", setDispConvert("Gamma 2.4"), nil, categoryState("", hasDispConversion("Gamma 2.4"))},
+        {"   Display Gamma...", enterDispGamma, "v", categoryState("", dispGammaState)},
         {"_", nil},
-        {"Display LUT Active", ~toggleDisplayLUT, "D", isDisplayLUTActiveState},
-        {"Display ICC Active", ~toggleDisplayICC, "", isDisplayICCActiveState},
+        {"Display LUT Active", ~toggleDisplayLUT, "D", categoryState("", isDisplayLUTActiveState)},
+        {"Display ICC Active", ~toggleDisplayICC, "", categoryState("", isDisplayICCActiveState)},
         {"_", nil},
-        {"Display Brightness (Interactive)", brightnessMode, "B", checkForDisplayColor()},
+        {"Display Brightness (Interactive)", brightnessMode, "B", categoryState("", checkForDisplayColor())},
         {"_", nil},
         {"Matte", Menu {
-            {"No Matte", ~setMatte(0),     nil, matteAspectState(0)},
-            {"1.33",     ~setMatte(1.33),  nil, matteAspectState(1.33)},
-            {"1.66",     ~setMatte(1.66),  nil, matteAspectState(1.66)},
-            {"1.77",     ~setMatte(1.77),  nil, matteAspectState(1.77)},
-            {"1.85",     ~setMatte(1.85),  nil, matteAspectState(1.85)},
-            {"2.35",     ~setMatte(2.35),  nil, matteAspectState(2.35)},
-            {"2.40",     ~setMatte(2.40),  nil, matteAspectState(2.40)},
+            {"No Matte", ~setMatte(0),     nil, categoryState("", matteAspectState(0))},
+            {"1.33",     ~setMatte(1.33),  nil, categoryState("", matteAspectState(1.33))},
+            {"1.66",     ~setMatte(1.66),  nil, categoryState("", matteAspectState(1.66))},
+            {"1.77",     ~setMatte(1.77),  nil, categoryState("", matteAspectState(1.77))},
+            {"1.85",     ~setMatte(1.85),  nil, categoryState("", matteAspectState(1.85))},
+            {"2.35",     ~setMatte(2.35),  nil, categoryState("", matteAspectState(2.35))},
+            {"2.40",     ~setMatte(2.40),  nil, categoryState("", matteAspectState(2.40))},
             {"_", nil},
-            {"Custom...",    enterMatte,   nil, matteAspectState(-1.0)}
+            {"Custom...",    enterMatte,   nil, categoryState("", matteAspectState(-1.0))}
         }},
         {"Matte Opacity", Menu {
-            {"33%",     ~setMatteOpacity(0.33),  nil, matteOpacityState(0.33)},
-            {"66%",     ~setMatteOpacity(0.66),  nil, matteOpacityState(0.66)},
-            {"100%",    ~setMatteOpacity(1.0),   nil, matteOpacityState(1.0)},
+            {"33%",     ~setMatteOpacity(0.33),  nil, categoryState("", matteOpacityState(0.33))},
+            {"66%",     ~setMatteOpacity(0.66),  nil, categoryState("", matteOpacityState(0.66))},
+            {"100%",    ~setMatteOpacity(1.0),   nil, categoryState("", matteOpacityState(1.0))},
             {"_", nil},
-            {"Custom...", enterMatteOpacity,   nil, matteOpacityState(-1.0)}
+            {"Custom...", enterMatteOpacity,   nil, categoryState("", matteOpacityState(-1.0))}
         }},
         {"_", nil},
         {"Channel Display", Menu {
-            {"Color (All Channels)", ~showChannel(0), "c", channelState(0)},
-            {"Red",             ~showChannel(1), "r", channelState(1)},
-            {"Green",           ~showChannel(2), "g", channelState(2)},
-            {"Blue",            ~showChannel(3), "b", channelState(3)},
-            {"Alpha",           ~showChannel(4), "a", channelState(4)},
+            {"Color (All Channels)", ~showChannel(0), "c", categoryState("", channelState(0))},
+            {"Red",             ~showChannel(1), "r", categoryState("", channelState(1))},
+            {"Green",           ~showChannel(2), "g", categoryState("", channelState(2))},
+            {"Blue",            ~showChannel(3), "b", categoryState("", channelState(3))},
+            {"Alpha",           ~showChannel(4), "a", categoryState("", channelState(4))},
             {"_", nil},
-            {"Luminance",       ~showChannel(5), "l", channelState(5)}}},
+            {"Luminance",       ~showChannel(5), "l", categoryState("", channelState(5))}}},
         {"Channel Order", Menu {
-            {"RGBA", ~channelOrder("RGBA"), nil, channelOrderState("RGBA")},
+            {"RGBA", ~channelOrder("RGBA"), nil, categoryState("", channelOrderState("RGBA"))},
             {"_", nil},
-            {"Custom...", enterOrder, nil, checkForDisplayNode()},
+            {"Custom...", enterOrder, nil, categoryState("", checkForDisplayNode())},
             {"_", nil},
-            {"RBGA", ~channelOrder("RBGA"), nil, channelOrderState("RBGA")},
-            {"GBRA", ~channelOrder("GBRA"), nil, channelOrderState("GBRA")},
-            {"GRBA", ~channelOrder("GRBA"), nil, channelOrderState("GRBA")},
-            {"BRGA", ~channelOrder("BRGA"), nil, channelOrderState("BRGA")},
-            {"BGRA", ~channelOrder("BGRA"), nil, channelOrderState("BGRA")},
+            {"RBGA", ~channelOrder("RBGA"), nil, categoryState("", channelOrderState("RBGA"))},
+            {"GBRA", ~channelOrder("GBRA"), nil, categoryState("", channelOrderState("GBRA"))},
+            {"GRBA", ~channelOrder("GRBA"), nil, categoryState("", channelOrderState("GRBA"))},
+            {"BRGA", ~channelOrder("BRGA"), nil, categoryState("", channelOrderState("BRGA"))},
+            {"BGRA", ~channelOrder("BGRA"), nil, categoryState("", channelOrderState("BGRA"))},
             {"_", nil},
-            {"ABGR", ~channelOrder("ABGR"), nil, channelOrderState("ABGR")},
-            {"ARGB", ~channelOrder("ARGB"), nil, channelOrderState("ARGB")},
+            {"ABGR", ~channelOrder("ABGR"), nil, categoryState("", channelOrderState("ABGR"))},
+            {"ARGB", ~channelOrder("ARGB"), nil, categoryState("", channelOrderState("ARGB"))},
             {"_", nil},
-            {"R00A", ~channelOrder("R00A"), nil, channelOrderState("R00A")},
-            {"0G0A", ~channelOrder("0G0A"), nil, channelOrderState("0G0A")},
-            {"00BA", ~channelOrder("00BA"), nil, channelOrderState("00BA")}
+            {"R00A", ~channelOrder("R00A"), nil, categoryState("", channelOrderState("R00A"))},
+            {"0G0A", ~channelOrder("0G0A"), nil, categoryState("", channelOrderState("0G0A"))},
+            {"00BA", ~channelOrder("00BA"), nil, categoryState("", channelOrderState("00BA"))}
         }},
         {"Background", Menu {
-            {"Black", setBGPattern(,"black"), nil,            testBGPattern("black")},
-            {"18% Grey", setBGPattern(,"grey18"), nil,        testBGPattern("grey18")},
-            {"50% Grey", setBGPattern(,"grey50"), nil,        testBGPattern("grey50")},
-            {"White", setBGPattern(,"white"), nil,            testBGPattern("white")},
-            {"Checker", setBGPattern(,"checker"), nil,        testBGPattern("checker")},
-            {"Cross Hatch", setBGPattern(,"crosshatch"), nil, testBGPattern("crosshatch")}
+            {"Black", setBGPattern(,"black"), nil,            categoryState("", testBGPattern("black"))},
+            {"18% Grey", setBGPattern(,"grey18"), nil,        categoryState("", testBGPattern("grey18"))},
+            {"50% Grey", setBGPattern(,"grey50"), nil,        categoryState("", testBGPattern("grey50"))},
+            {"White", setBGPattern(,"white"), nil,            categoryState("", testBGPattern("white"))},
+            {"Checker", setBGPattern(,"checker"), nil,        categoryState("", testBGPattern("checker"))},
+            {"Cross Hatch", setBGPattern(,"crosshatch"), nil, categoryState("", testBGPattern("crosshatch"))}
         }},
         {"_", nil},
         {"Dither", Menu {
-            {"Off", setDither(,0), nil, testDither(0)},
-            {"8 Bit", setDither(,8), nil, testDither(8)},
-            {"10 Bit", setDither(,10), nil, testDither(10)}
+            {"Off", setDither(,0), nil, categoryState("", testDither(0))},
+            {"8 Bit", setDither(,8), nil, categoryState("", testDither(8))},
+            {"10 Bit", setDither(,10), nil, categoryState("", testDither(10))}
         }},
         {"_", nil},
-        {"Show Out Of Range Colors", ~toggleOutOfRange, nil, isOutOfRange},
+        {"Show Out Of Range Colors", ~toggleOutOfRange, nil, categoryState("", isOutOfRange)},
         {"_", nil},
-        {"Create/Edit Display Profiles...", ~editProfiles, nil, displayProfilesState},
+        {"Create/Edit Display Profiles...", ~editProfiles, nil, categoryState("", displayProfilesState)},
         {"_", nil},
-        {"Linear Filter",   ~toggleFilter, "n", filterState},
-        {"Lock Pixel Scale During Resize",  toggleLockResizeScale, nil, lockResizeScaleState},
-        {"Preserve Image Height in Pixel Aspect Scaling",  toggleExpandWidth, nil, isExpandedWidth}
+        {"Linear Filter",   ~toggleFilter, "n", categoryState("", filterState)},
+        {"Lock Pixel Scale During Resize",  toggleLockResizeScale, nil, categoryState("", lockResizeScaleState)},
+        {"Preserve Image Height in Pixel Aspect Scaling",  toggleExpandWidth, nil, categoryState("", isExpandedWidth)}
     };
 
     return a;
@@ -6443,54 +6411,54 @@ global bool debugGC = false;
 {
 
    Menu exportMenu = Menu {
-            {"Quicktime Movie...", exportAs(, "mov", "Quicktime Export"), "control e", videoSourcesExistAndExportOKState},
-            {"Image Sequence...", exportAs(, "*", "Image Sequence Export"), nil, videoSourcesExistAndExportOKState},
-            {"Marked Frames...", exportMarked, nil, hasMarksState},
-            {"Annotated Frames...", exportAnnotatedFrames, nil, videoSourcesExistState},
-            {"Audio File...", exportAs(, "*", "Audio Export"), nil, sourcesExistState},
-            {"Snapshot...", exportFrame(,exportCurrentFrame), nil, videoSourcesExistState},
-            {"Current Source Frame...", exportFrame(,exportCurrentSourceFrame), nil, videoSourcesExistState},
-            {"Image Attributes...", exportAttrs, nil, videoSourcesExistState},
-            {"RVIO Ready Session...", exportAs(, "rv", "Session Export"), nil, videoSourcesExistState},
-            {"OTIO File...", exportOtio, nil, canExportOTIOState}};
+            {"Quicktime Movie...", exportAs(, "mov", "Quicktime Export"), "control e", categoryState("", videoSourcesExistAndExportOKState)},
+            {"Image Sequence...", exportAs(, "*", "Image Sequence Export"), nil, categoryState("", videoSourcesExistAndExportOKState)},
+            {"Marked Frames...", exportMarked, nil, categoryState("", hasMarksState)},
+            {"Annotated Frames...", exportAnnotatedFrames, nil, categoryState("", videoSourcesExistState)},
+            {"Audio File...", exportAs(, "*", "Audio Export"), nil, categoryState("", sourcesExistState)},
+            {"Snapshot...", exportFrame(,exportCurrentFrame), nil, categoryState("", videoSourcesExistState)},
+            {"Current Source Frame...", exportFrame(,exportCurrentSourceFrame), nil, categoryState("", videoSourcesExistState)},
+            {"Image Attributes...", exportAttrs, nil, categoryState("", videoSourcesExistState)},
+            {"RVIO Ready Session...", exportAs(, "rv", "Session Export"), nil, categoryState("", videoSourcesExistState)},
+            {"OTIO File...", exportOtio, nil, categoryState("", canExportOTIOState)}};
 
     if (true || shortAppName() == "rvx")
     {
-         exportMenu.push_back (MenuItem {"Definition of Current View Node ...", exportNodeDefinition(false,), nil, videoSourcesExistState});
-         exportMenu.push_back (MenuItem {"All Node Definitions ...", exportNodeDefinition(true,), nil, videoSourcesExistState});
+         exportMenu.push_back (MenuItem {"Definition of Current View Node ...", exportNodeDefinition(false,), nil, categoryState("", videoSourcesExistState)});
+         exportMenu.push_back (MenuItem {"All Node Definitions ...", exportNodeDefinition(true,), nil, categoryState("", videoSourcesExistState)});
     }
 
     Menu mainMenu_part1 = {
         {"File", Menu {
-            {"New Session", \: (void; Event ev) { newSession(nil); }, "control n", newSessionState},
-            {"Open...",  addMovieOrImageSources(,true,false), "control o", nil},
-            {"Merge...",  addMovieOrImageSources(,true,true), nil, nil},
-            {"Open into Layer...",  addMovieOrImage(,addToClosestSource(,"explicit"),false), nil, sourcesExistState},
-            {"Open in New Session...",  openMovieOrImage, "control O", newSessionState},
+            {"New Session", \: (void; Event ev) { newSession(nil); }, "control n", categoryState("", newSessionState)},
+            {"Open...",  addMovieOrImageSources(,true,false), "control o", categoryState("")},
+            {"Merge...",  addMovieOrImageSources(,true,true), nil, categoryState("")},
+            {"Open into Layer...",  addMovieOrImage(,addToClosestSource(,"explicit"),false), nil, categoryState("", sourcesExistState)},
+            {"Open in New Session...",  openMovieOrImage, "control O", categoryState("", newSessionState)},
             {"_", nil},
-            {"Clone Session", cloneSession, nil, newSessionState},
-            {"Clone RV", cloneRV, nil, nil},
-            {"Clone Synced RV", cloneSyncedRV, nil, nil},
+            {"Clone Session", cloneSession, nil, categoryState("", newSessionState)},
+            {"Clone RV", cloneRV, nil, categoryState("")},
+            {"Clone Synced RV", cloneSyncedRV, nil, categoryState("")},
             {"_", nil},
-            {"Relocate Movie or Image Sequence...",  relocateMovieOrImage, nil, singleSourceState},
-            {"Replace Source Media...", replaceSourceMedia, nil, singleSourceState},
+            {"Relocate Movie or Image Sequence...",  relocateMovieOrImage, nil, categoryState("", singleSourceState)},
+            {"Replace Source Media...", replaceSourceMedia, nil, categoryState("", singleSourceState)},
             {"_", nil},
-            {"Save Session", save, "control s", nil},
-            {"Save Session As...", saveAs, "control S", nil},
+            {"Save Session", save, "control s", categoryState("")},
+            {"Save Session As...", saveAs, "control S", categoryState("")},
             {"_", nil},
             {"Import", Menu {
-                {"Display LUT...",  openLUTFile("@RVDisplayColor"), nil, checkForDisplayColor()},
-                {"Pre-Cache LUT...",  openLUTFile("#RVCacheLUT"), nil, videoSourcesAndNodeExistState("RVCacheLUT")},
-                {"File LUT...",  openLUTFile("#RVLinearize"), nil, videoSourcesAndNodeExistState("RVLinearize")},
-                {"File CDL...",  openCDLFile("#RVLinearize"), nil, videoSourcesAndNodeExistState("RVLinearize")},
-                {"Look LUT...",  openLUTFile("#RVLookLUT"), nil, videoSourcesAndNodeExistState("RVLookLUT")},
-                {"Look CDL...",  openCDLFile("#RVColor"), nil, videoSourcesAndNodeExistState("RVColor")},
-                {"File OTIO...",  openOTIOFile(), nil, checkForOTIOFile()},
-                {"Simple EDL...",  ~openSimpleEDL, nil, nil}}},
+                {"Display LUT...",  openLUTFile("@RVDisplayColor"), nil, categoryState("", checkForDisplayColor())},
+                {"Pre-Cache LUT...",  openLUTFile("#RVCacheLUT"), nil, categoryState("", videoSourcesAndNodeExistState("RVCacheLUT"))},
+                {"File LUT...",  openLUTFile("#RVLinearize"), nil, categoryState("", videoSourcesAndNodeExistState("RVLinearize"))},
+                {"File CDL...",  openCDLFile("#RVLinearize"), nil, categoryState("", videoSourcesAndNodeExistState("RVLinearize"))},
+                {"Look LUT...",  openLUTFile("#RVLookLUT"), nil, categoryState("", videoSourcesAndNodeExistState("RVLookLUT"))},
+                {"Look CDL...",  openCDLFile("#RVColor"), nil, categoryState("", videoSourcesAndNodeExistState("RVColor"))},
+                {"File OTIO...",  openOTIOFile(), nil, categoryState("", checkForOTIOFile())},
+                {"Simple EDL...",  ~openSimpleEDL, nil, categoryState("")}}},
             {"Export", exportMenu},
             {"_", nil},
-            {"Clear",           ~clearEverything, "control N", nil},
-            {"Close Session",    queryClose, "control w", nil}
+            {"Clear",           ~clearEverything, "control N", categoryState("")},
+            {"Close Session",    queryClose, "control w", categoryState("")}
             }},
         {"Edit", Menu {
             //{"Undo",              nil,     nil,   inactiveState},
@@ -6516,43 +6484,43 @@ global bool debugGC = false;
                 {"Widen to Full Range",        ~resetRange,  nil,     nil},
                 */
                 {"_", nil},
-                {"Set Range From Marks/Boundaries",  ~setInOutMarkedRange, "|",      rangeState},
-                {"Next Range From Marks/Boundaries", ~nextMarkedRange, "control right", rangeState},
-                {"Prev Range From Marks/Boundaries", ~previousMarkedRange, "control left", rangeState},
-                {"Expand Range From Marks/Boundaries", ~expandMarkedRange, "control up", rangeState},
-                {"Contract Range From Marks/Boundaries", ~contractMarkedRange, "control down", rangeState}}},
-            {"Set Range Offset", setRangeOffset, nil, sourcesExistState},
+                {"Set Range From Marks/Boundaries",  ~setInOutMarkedRange, "|",      categoryState("", rangeState)},
+                {"Next Range From Marks/Boundaries", ~nextMarkedRange, "control right", categoryState("", rangeState)},
+                {"Prev Range From Marks/Boundaries", ~previousMarkedRange, "control left", categoryState("", rangeState)},
+                {"Expand Range From Marks/Boundaries", ~expandMarkedRange, "control up", categoryState("", rangeState)},
+                {"Contract Range From Marks/Boundaries", ~contractMarkedRange, "control down", categoryState("", rangeState)}}},
+            {"Set Range Offset", setRangeOffset, nil, categoryState("", sourcesExistState)},
             }},
         {"Control", Menu {
-            {"Play",            ~togglePlayFunc,     nil, playState},
-            {"Stop",            ~stopFunc,           nil, rangeState},
-            {"PingPong",        ~togglePingPong, nil, pingPongState},
-            {"Play Once",       ~togglePlayOnce, nil, playOnceState},
-            {"Step Forward",    ~stepForward1,   nil, rangeState},
-            {"Step Backward",   ~stepBackward1,  nil, rangeState},
-            {"Reverse",         ~toggleForwardsBackwards, nil, rangeState},
+            {"Play",            ~togglePlayFunc,     nil, categoryState("", playState)},
+            {"Stop",            ~stopFunc,           nil, categoryState("", rangeState)},
+            {"PingPong",        ~togglePingPong, nil, categoryState("", pingPongState)},
+            {"Play Once",       ~togglePlayOnce, nil, categoryState("", playOnceState)},
+            {"Step Forward",    ~stepForward1,   nil, categoryState("", rangeState)},
+            {"Step Backward",   ~stepBackward1,  nil, categoryState("", rangeState)},
+            {"Reverse",         ~toggleForwardsBackwards, nil, categoryState("", rangeState)},
             {"_", nil},
-            {"Go To Frame...",   enterFrame, "G",  rangeState},
+            {"Go To Frame...",   enterFrame, "G",  categoryState("", rangeState)},
             {"_", nil},
-            {"Play All Frames", ~toggleRealtime, "A",           realtimeState},
+            {"Play All Frames", ~toggleRealtime, "A",           categoryState("", realtimeState)},
                 {"FPS", Menu {
-                    {"24",       ~setFPSFunc(24.0),  "alt 2",   rangeState},
-                    {"25",       ~setFPSFunc(25.0),  "alt 5",   rangeState},
-                    {"23.98",    ~setFPSFunc(23.98),  nil,          rangeState},
-                    {"30",       ~setFPSFunc(30.0),  "alt 3",   rangeState},
-                    {"29.97",    ~setFPSFunc(29.97),  nil,          rangeState},
+                    {"24",       ~setFPSFunc(24.0),  "alt 2",   categoryState("", rangeState)},
+                    {"25",       ~setFPSFunc(25.0),  "alt 5",   categoryState("", rangeState)},
+                    {"23.98",    ~setFPSFunc(23.98),  nil,          categoryState("", rangeState)},
+                    {"30",       ~setFPSFunc(30.0),  "alt 3",   categoryState("", rangeState)},
+                    {"29.97",    ~setFPSFunc(29.97),  nil,          categoryState("", rangeState)},
                     {"_", nil},
-                    {"Custom...", enterFPS,           "F",          rangeState}}},
+                    {"Custom...", enterFPS,           "F",          categoryState("", rangeState)}}},
             {"_", nil},
-            {"Play Forward",    ~incN(1),       ".",            forwardState},
-            {"Play Backward",   ~incN(-1),      ",",            backwardState},
+            {"Play Forward",    ~incN(1),       ".",            categoryState("", forwardState)},
+            {"Play Backward",   ~incN(-1),      ",",            categoryState("", backwardState)},
             {"_", nil},
-            {"Jump To Beginning", ~beginning,           "home",         rangeState},
-            {"Jump To Ending",    ~ending,              "end",          rangeState},
-            {"Next Marked Frame", ~nextMarkedFrame,     "alt right", rangeState},
-            {"Prev Marked Frame", ~previousMarkedFrame, "alt left", rangeState},
-            {"Matching Frame Of Next Source", ~nextMatchedFrame,     ">", rangeState},
-            {"Matching Frame Of Previous Source", ~previousMatchedFrame, "<", rangeState},
+            {"Jump To Beginning", ~beginning,           "home",         categoryState("", rangeState)},
+            {"Jump To Ending",    ~ending,              "end",          categoryState("", rangeState)},
+            {"Next Marked Frame", ~nextMarkedFrame,     "alt right", categoryState("", rangeState)},
+            {"Prev Marked Frame", ~previousMarkedFrame, "alt left", categoryState("", rangeState)},
+            {"Matching Frame Of Next Source", ~nextMatchedFrame,     ">", categoryState("", rangeState)},
+            {"Matching Frame Of Previous Source", ~previousMatchedFrame, "<", categoryState("", rangeState)},
             /*  
              * Moved to prefs GUI
              *
@@ -6563,142 +6531,142 @@ global bool debugGC = false;
             }},
         {"Tools", Menu {
             {"Default Views", nil, nil, inactiveState},
-            {"   Sequence", setCompModeAndView(nil,"defaultSequence"), nil, viewNodeState("defaultSequence")},
-            {"   Replace", setCompModeAndView("replace","defaultStack"), nil, isStackAndCompMode("replace")},
-            {"   Over", setCompModeAndView("over","defaultStack"), nil, isStackAndCompMode("over")},
-            {"   Add", setCompModeAndView("add","defaultStack"), nil, isStackAndCompMode("add")},
-            //{"   Dissolve", setCompModeAndView("difference","defaultStack"), nil, isStackAndCompMode("dissolve")}, 
-            {"   Difference", setCompModeAndView("difference","defaultStack"), nil, isStackAndCompMode("difference")}, 
-            {"   Difference (Inverted)", setCompModeAndView("-difference","defaultStack"), nil, isStackAndCompMode("-difference")},
-            //{"   Picture in Picture", setCompModeAndView("pip","defaultStack"), nil, isStackAndCompMode("pip")},
-            {"   Tile", setCompModeAndView(nil,"defaultLayout"), nil, viewNodeState("defaultLayout")},
+            {"   Sequence", setCompModeAndView(nil,"defaultSequence"), nil, categoryState("", viewNodeState("defaultSequence"))},
+            {"   Replace", setCompModeAndView("replace","defaultStack"), nil, categoryState("", isStackAndCompMode("replace"))},
+            {"   Over", setCompModeAndView("over","defaultStack"), nil, categoryState("", isStackAndCompMode("over"))},
+            {"   Add", setCompModeAndView("add","defaultStack"), nil, categoryState("", isStackAndCompMode("add"))},
+            //{"   Dissolve", setCompModeAndView("difference","defaultStack"), nil, categoryState("", isStackAndCompMode("dissolve"))}, 
+            {"   Difference", setCompModeAndView("difference","defaultStack"), nil, categoryState("", isStackAndCompMode("difference"))}, 
+            {"   Difference (Inverted)", setCompModeAndView("-difference","defaultStack"), nil, categoryState("", isStackAndCompMode("-difference"))},
+            //{"   Picture in Picture", setCompModeAndView("pip","defaultStack"), nil, categoryState("", isStackAndCompMode("pip"))},
+            {"   Tile", setCompModeAndView(nil,"defaultLayout"), nil, categoryState("", viewNodeState("defaultLayout"))},
             {"_", nil},
-            {"Timeline",        ~toggleTimeline, "F2", timelineShown},
-            {"Timeline Magnifier", ~toggleMotionScope, "F3", motionScopeShown},
-            {"Image Info",      ~toggleInfo,     "F4", infoShown},
-            {"Color Inspector", ~toggleColorInspector, "F5", colorInspectorShown},
-            {"Wipes",           ~toggleWipe, "F6", wipeShown},
-            {"Info Strip",      ~toggleInfoStrip, "F7", infoStripShown},
-            {"Process Info",    ~toggleProcessInfo, "F8", processInfoShown},
-            {"Source Details",  ~toggleSourceDetails, "F11", sourceDetailsShown},
+            {"Timeline",        ~toggleTimeline, "F2", categoryState("", timelineShown)},
+            {"Timeline Magnifier", ~toggleMotionScope, "F3", categoryState("", motionScopeShown)},
+            {"Image Info",      ~toggleInfo,     "F4", categoryState("", infoShown)},
+            {"Color Inspector", ~toggleColorInspector, "F5", categoryState("", colorInspectorShown)},
+            {"Wipes",           ~toggleWipe, "F6", categoryState("", wipeShown)},
+            {"Info Strip",      ~toggleInfoStrip, "F7", categoryState("", infoStripShown)},
+            {"Process Info",    ~toggleProcessInfo, "F8", categoryState("", processInfoShown)},
+            {"Source Details",  ~toggleSourceDetails, "F11", categoryState("", sourceDetailsShown)},
             {"_", nil},
-            {"Menu Bar",        ~toggleMenuBar,  "F1", menuBarShown},
-            {"Top View Toolbar",    toggleTopViewToolbar,  nil, topTBShown},
-            {"Bottom View Toolbar", toggleBottomViewToolbar,  nil, botTBShown},
+            {"Menu Bar",        ~toggleMenuBar,  "F1", categoryState("", menuBarShown)},
+            {"Top View Toolbar",    toggleTopViewToolbar,  nil, categoryState("", topTBShown)},
+            {"Bottom View Toolbar", toggleBottomViewToolbar,  nil, categoryState("", botTBShown)},
             {"_", nil},
-            {"Force Reload Current Frame", ~reload, "R", sourcesExistState},
-            {"Force Reload Region", ~reloadInOut, "control R", sourcesExistState},
-            {"Reload Changed Frames", ~loadCurrentSourcesChangedFrames, "control C", sourcesExistState},
+            {"Force Reload Current Frame", ~reload, "R", categoryState("", sourcesExistState)},
+            {"Force Reload Region", ~reloadInOut, "control R", categoryState("", sourcesExistState)},
+            {"Reload Changed Frames", ~loadCurrentSourcesChangedFrames, "control C", categoryState("", sourcesExistState)},
             {"_", nil},
             {"Cache Mode",  nil,  nil, inactiveState},
-            {"   Look-Ahead Cache", cacheModeFunc(CacheBuffer), "control l", cacheStateFunc(CacheBuffer)},
-            {"   Region Cache",  cacheModeFunc(CacheGreedy), "C", cacheStateFunc(CacheGreedy)},
-            {"   Cache Off", cacheModeFunc(CacheOff),  nil, cacheStateFunc(CacheOff)},
-            {"   Release All Cached Images", ~releaseAllCachedImages,  nil, nil},
+            {"   Look-Ahead Cache", cacheModeFunc(CacheBuffer), "control l", categoryState("", cacheStateFunc(CacheBuffer))},
+            {"   Region Cache",  cacheModeFunc(CacheGreedy), "C", categoryState("", cacheStateFunc(CacheGreedy))},
+            {"   Cache Off", cacheModeFunc(CacheOff),  nil, categoryState("", cacheStateFunc(CacheOff))},
+            {"   Release All Cached Images", ~releaseAllCachedImages,  nil, categoryState("")},
             {"_", nil},
-            {"Diagnostics",    showDiagnosticsWindow, nil, nil},
+            {"Diagnostics",    showDiagnosticsWindow, nil, categoryState("")},
             {"_", nil},
             }},
         {"Audio", Menu {
-            {"Mute", ~toggleMute, nil, isMuted},
-            {"Scrubbing", toggleAudioScrub, nil, scrubAudioState},
+            {"Mute", ~toggleMute, nil, categoryState("", isMuted)},
+            {"Scrubbing", toggleAudioScrub, nil, categoryState("", scrubAudioState)},
             {"_", nil},
             {"Global",  nil,  nil, inactiveState},
-            {"   Volume",  globalVolumeMode,     "control v", nil},
-            {"   Offset (seconds)",  globalAudioOffsetMode, nil, nil},
-            {"   Offset (frames)",  globalAudioOffsetFramesMode, nil, nil},
-            {"   Balance", globalBalanceMode,   nil, nil},
+            {"   Volume",  globalVolumeMode,     "control v", categoryState("")},
+            {"   Offset (seconds)",  globalAudioOffsetMode, nil, categoryState("")},
+            {"   Offset (frames)",  globalAudioOffsetFramesMode, nil, categoryState("")},
+            {"   Balance", globalBalanceMode,   nil, categoryState("")},
             {"Source",  nil,  nil, inactiveState},
-            {"   Volume", sourceVolumeMode, nil, sourcesExistState},
-            {"   Offset (seconds)", sourceAudioOffsetMode, nil, sourcesExistState},
-            {"   Offset (frames)",  sourceAudioOffsetFramesMode, nil, sourcesExistState},
-            {"   Balance", sourceBalanceMode,   nil, sourcesExistState},
+            {"   Volume", sourceVolumeMode, nil, categoryState("", sourcesExistState)},
+            {"   Offset (seconds)", sourceAudioOffsetMode, nil, categoryState("", sourcesExistState)},
+            {"   Offset (frames)",  sourceAudioOffsetFramesMode, nil, categoryState("", sourcesExistState)},
+            {"   Balance", sourceBalanceMode,   nil, categoryState("", sourcesExistState)},
             {"_", nil},
-            {"   Reset All Offsets", resetAudioOffsets, nil, nil},
+            {"   Reset All Offsets", resetAudioOffsets, nil, categoryState("")},
         }},
         {"Image", Menu {
                 {"Color Resolution", Menu {
-                    {"Allow Floating Point", ~toggleFloat, nil, isFloatAllowed},
+                    {"Allow Floating Point", ~toggleFloat, nil, categoryState("", isFloatAllowed)},
                     {"_", nil},
-                    {"Maximum Allowed", ~setBitDepthFunc(0), nil, bitDepthState(0)},
-                    {"8", ~setBitDepthFunc(8), nil, bitDepthState(8)},
-                    {"16", ~setBitDepthFunc(16), nil, bitDepthState(16)},
-                    {"32", ~setBitDepthFunc(32), nil, bitDepthState(32)}}},
+                    {"Maximum Allowed", ~setBitDepthFunc(0), nil, categoryState("", bitDepthState(0))},
+                    {"8", ~setBitDepthFunc(8), nil, categoryState("", bitDepthState(8))},
+                    {"16", ~setBitDepthFunc(16), nil, categoryState("", bitDepthState(16))},
+                    {"32", ~setBitDepthFunc(32), nil, categoryState("", bitDepthState(32))}}},
                 {"Image Resolution", Menu {
-                    {"1.0",  ~setImageResolution(1.0), nil, imageResState(1.0)},
-                    {"0.5",  ~setImageResolution(0.5), nil, imageResState(0.5)},
-                    {"0.25", ~setImageResolution(0.25), nil, imageResState(0.25)},
+                    {"1.0",  ~setImageResolution(1.0), nil, categoryState("", imageResState(1.0))},
+                    {"0.5",  ~setImageResolution(0.5), nil, categoryState("", imageResState(0.5))},
+                    {"0.25", ~setImageResolution(0.25), nil, categoryState("", imageResState(0.25))},
                     {"_", nil},
-                    {"Custom...", enterRes, nil, videoSourcesAndNodeExistState("RVFormat")}}},
+                    {"Custom...", enterRes, nil, categoryState("", videoSourcesAndNodeExistState("RVFormat"))}}},
                 {"Scale", Menu {
-                    {"1:1",  ~pixelRelativeScale(1.0),  "1", videoSourcesExistState},
+                    {"1:1",  ~pixelRelativeScale(1.0),  "1", categoryState("", videoSourcesExistState)},
                     {"_", nil},
-                    {"2:1",  ~pixelRelativeScale(2.0),  "2", videoSourcesExistState},
-                    {"4:1",  ~pixelRelativeScale(4.0),  "4", videoSourcesExistState},
-                    {"8:1",  ~pixelRelativeScale(8.0),  "8", videoSourcesExistState},
+                    {"2:1",  ~pixelRelativeScale(2.0),  "2", categoryState("", videoSourcesExistState)},
+                    {"4:1",  ~pixelRelativeScale(4.0),  "4", categoryState("", videoSourcesExistState)},
+                    {"8:1",  ~pixelRelativeScale(8.0),  "8", categoryState("", videoSourcesExistState)},
                     {"_", nil},
-                    {"1:2",  ~pixelRelativeScale(1.0/2.0),  "control 2", videoSourcesExistState},
-                    {"1:4",  ~pixelRelativeScale(1.0/4.0),  "control 4", videoSourcesExistState},
-                    {"1:8",  ~pixelRelativeScale(1.0/8.0),  "control 8", videoSourcesExistState}}},
+                    {"1:2",  ~pixelRelativeScale(1.0/2.0),  "control 2", categoryState("", videoSourcesExistState)},
+                    {"1:4",  ~pixelRelativeScale(1.0/4.0),  "control 4", categoryState("", videoSourcesExistState)},
+                    {"1:8",  ~pixelRelativeScale(1.0/8.0),  "control 8", categoryState("", videoSourcesExistState)}}},
                 {"Rotation", Menu {
-                    {"No Rotation",         ~rotateImage(0.0, false),    nil, rotateState(0.0)},
-                    {"90 Clockwise",        ~rotateImage(90.0, false),   nil, rotateState(90.0)},
-                    {"90 Counter-Clockwise",~rotateImage(-90.0, false),  nil, rotateState(-90.0)},
-                    {"180",                 ~rotateImage(180.0, true),  nil, rotateState(180.0)},
+                    {"No Rotation",         ~rotateImage(0.0, false),    nil, categoryState("", rotateState(0.0))},
+                    {"90 Clockwise",        ~rotateImage(90.0, false),   nil, categoryState("", rotateState(90.0))},
+                    {"90 Counter-Clockwise",~rotateImage(-90.0, false),  nil, categoryState("", rotateState(-90.0))},
+                    {"180",                 ~rotateImage(180.0, true),  nil, categoryState("", rotateState(180.0))},
                     {"_", nil},
-                    {"+90 Clockwise",        ~rotateImage(90.0, true),   nil, videoSourcesAndNodeExistState("RVTransform2D")},
-                    {"+90 Counter-Clockwise",~rotateImage(-90.0, true),  nil, videoSourcesAndNodeExistState("RVTransform2D")},
+                    {"+90 Clockwise",        ~rotateImage(90.0, true),   nil, categoryState("", videoSourcesAndNodeExistState("RVTransform2D"))},
+                    {"+90 Counter-Clockwise",~rotateImage(-90.0, true),  nil, categoryState("", videoSourcesAndNodeExistState("RVTransform2D"))},
                     {"_", nil},
-                    {"Arbitrary (Rotate Mode)", rotateMode,   nil, videoSourcesAndNodeExistState("RVTransform2D")}}},
+                    {"Arbitrary (Rotate Mode)", rotateMode,   nil, categoryState("", videoSourcesAndNodeExistState("RVTransform2D"))}}},
                 {"Alpha Type", Menu {
-                    {"From Image",  ~alphaTypeFunc(0),  nil, alphaTypeState(0)},
+                    {"From Image",  ~alphaTypeFunc(0),  nil, categoryState("", alphaTypeState(0))},
                     {"_", nil},
-                    {"Unpremultiplied",  ~alphaTypeFunc(2),  nil, alphaTypeState(2)},
-                    {"Premultiplied",  ~alphaTypeFunc(1),  nil, alphaTypeState(1)}}},
+                    {"Unpremultiplied",  ~alphaTypeFunc(2),  nil, categoryState("", alphaTypeState(2))},
+                    {"Premultiplied",  ~alphaTypeFunc(1),  nil, categoryState("", alphaTypeState(1))}}},
                 {"Pixel Aspect Ratio", Menu {
-                    {"From Image",  ~pixelAspectFunc(0.0),  nil, aspectState(0.0)},
+                    {"From Image",  ~pixelAspectFunc(0.0),  nil, categoryState("", aspectState(0.0))},
                     {"_", nil},
-                    {"Square",  ~pixelAspectFunc(1.0),  nil, aspectState(1.0)},
-                    {"NTSC D1 DV  4:3",  ~pixelAspectFunc(0.9),  nil, aspectState(0.9)},
-                    {"NTSC D1 DV  16:9", ~pixelAspectFunc(1.2), nil, aspectState(1.2)},
-                    {"PAL  4:3",         ~pixelAspectFunc(1.06666),  nil, aspectState(1.0666)},
-                    {"PAL  16:9",        ~pixelAspectFunc(1.422), nil, aspectState(1.422)},
-                    {"Anamorphic  2:1",  ~pixelAspectFunc(2.0), nil, aspectState(2.0)},
+                    {"Square",  ~pixelAspectFunc(1.0),  nil, categoryState("", aspectState(1.0))},
+                    {"NTSC D1 DV  4:3",  ~pixelAspectFunc(0.9),  nil, categoryState("", aspectState(0.9))},
+                    {"NTSC D1 DV  16:9", ~pixelAspectFunc(1.2), nil, categoryState("", aspectState(1.2))},
+                    {"PAL  4:3",         ~pixelAspectFunc(1.06666),  nil, categoryState("", aspectState(1.0666))},
+                    {"PAL  16:9",        ~pixelAspectFunc(1.422), nil, categoryState("", aspectState(1.422))},
+                    {"Anamorphic  2:1",  ~pixelAspectFunc(2.0), nil, categoryState("", aspectState(2.0))},
                     {"_", nil},
-                    {"Custom...", enterPixAspect, nil, videoSourcesAndNodeExistState("RVLensWarp")}}},
+                    {"Custom...", enterPixAspect, nil, categoryState("", videoSourcesAndNodeExistState("RVLensWarp"))}}},
                 {"Stereo", Menu {
-                    {"Swap Eyes", ~toggleSourceSwapEyes, nil, propToggledAndStereoOnState("#RVSourceStereo.stereo.swap")},
-                    {"Flip Right Eye", ~toggleSourceRFlip, nil, propToggledAndStereoOnState("#RVSourceStereo.rightTransform.flip")},
-                    {"Flop Right Eye", ~toggleSourceRFlop, nil, propToggledAndStereoOnState("#RVSourceStereo.rightTransform.flop")},
+                    {"Swap Eyes", ~toggleSourceSwapEyes, nil, categoryState("", propToggledAndStereoOnState("#RVSourceStereo.stereo.swap"))},
+                    {"Flip Right Eye", ~toggleSourceRFlip, nil, categoryState("", propToggledAndStereoOnState("#RVSourceStereo.rightTransform.flip"))},
+                    {"Flop Right Eye", ~toggleSourceRFlop, nil, categoryState("", propToggledAndStereoOnState("#RVSourceStereo.rightTransform.flop"))},
                     {"_", nil},
                     {"Interactive Edit",      nil, nil, inactiveState },
-                    {"    Relative Eye Offset (%)", sourceStereoOffsetMode, nil, eyeOffsetState},
-                    {"    Right Eye Only Offset (%)", sourceStereoROffsetMode, nil, eyeOffsetState},
+                    {"    Relative Eye Offset (%)", sourceStereoOffsetMode, nil, categoryState("", eyeOffsetState)},
+                    {"    Right Eye Only Offset (%)", sourceStereoROffsetMode, nil, categoryState("", eyeOffsetState)},
                     }},
             {"_", nil},
-            {"Flip",            ~toggleFlip, "Y", toggleFlipState},
-            {"Flop",            ~toggleFlop, "X", toggleFlopState},
+            {"Flip",            ~toggleFlip, "Y", categoryState("", toggleFlipState)},
+            {"Flop",            ~toggleFlop, "X", categoryState("", toggleFlopState)},
             {"_", nil},
-            {"Remap Source Image Channels...", enterChanMap, nil, videoSourcesAndNodeExistState("RVChannelMap")},
+            {"Remap Source Image Channels...", enterChanMap, nil, categoryState("", videoSourcesAndNodeExistState("RVChannelMap"))},
             {"_", nil},
-            {"Set Source FPS...", enterSourceFPS, nil, sourcesExistState},
+            {"Set Source FPS...", enterSourceFPS, nil, categoryState("", sourcesExistState)},
             {"_", nil},
-            {"Cycle Stack Forward", cycleStackForward, ")", isStackMode},
-            {"Cycle Stack Backward", cycleStackBackward, "(", isStackMode}
+            {"Cycle Stack Forward", cycleStackForward, ")", categoryState("", isStackMode)},
+            {"Cycle Stack Backward", cycleStackBackward, "(", categoryState("", isStackMode)}
             }},
         {"Color", Menu {
                 {"Luminance Look Up Table", Menu {
-                    {"Active",   ~toggleLuminanceLUT, "T", isLuminanceLUTActiveState},
+                    {"Active",   ~toggleLuminanceLUT, "T", categoryState("", isLuminanceLUTActiveState)},
                     {"_", nil},
                     {"Luminance LUTS", nil, nil, inactiveState},
-                    {"   HSV ",   ~HSVLUT,    nil, luminanceLUTState("HSV")},
-                    {"   Contour 3",   ~contourLUT(3),    nil, luminanceLUTState("Contour 3")},
-                    {"   Contour 4",   ~contourLUT(4),    nil, luminanceLUTState("Contour 4")},
-                    {"   Contour 6",   ~contourLUT(6),    nil, luminanceLUTState("Contour 6")},
-                    {"   Contour 10",   ~contourLUT(10),    nil, luminanceLUTState("Contour 10")},
-                    {"   Contour 20",   ~contourLUT(20),    nil, luminanceLUTState("Contour 20")},
-                    {"   Contour 100",   ~contourLUT(100),  nil, luminanceLUTState("Contour 100")},
-                    {"   Random",   ~randomLUT,  "*", luminanceLUTState("Random")}}},
+                    {"   HSV ",   ~HSVLUT,    nil, categoryState("", luminanceLUTState("HSV"))},
+                    {"   Contour 3",   ~contourLUT(3),    nil, categoryState("", luminanceLUTState("Contour 3"))},
+                    {"   Contour 4",   ~contourLUT(4),    nil, categoryState("", luminanceLUTState("Contour 4"))},
+                    {"   Contour 6",   ~contourLUT(6),    nil, categoryState("", luminanceLUTState("Contour 6"))},
+                    {"   Contour 10",   ~contourLUT(10),    nil, categoryState("", luminanceLUTState("Contour 10"))},
+                    {"   Contour 20",   ~contourLUT(20),    nil, categoryState("", luminanceLUTState("Contour 20"))},
+                    {"   Contour 100",   ~contourLUT(100),  nil, categoryState("", luminanceLUTState("Contour 100"))},
+                    {"   Random",   ~randomLUT,  "*", categoryState("", luminanceLUTState("Random"))}}},
                     //
                     // XXX I am not sure what this is supposed to do but it only generates errors right now (jon)
                     //
@@ -6706,46 +6674,46 @@ global bool debugGC = false;
                     //{"output LUT to shell",   ~outputLUT,    nil, nil}}},
             {"_", nil},
             {"File Nonlinear to Linear Conversion", nil, nil, inactiveState},
-            {"   No Conversion",    setLinConvert(""), nil, hasLinConversion("")},
-            {"   Cineon/DPX Log",   setLinConvert("Cineon Log"), "L", hasLinConversion("Cineon Log")},
-            {"   ALEXA LogC",       setLinConvert("ALEXA LogC"), nil, hasLinConversion("ALEXA LogC")},
-            {"   ALEXA LogC Film",  setLinConvert("ALEXA LogC Film"), nil, hasLinConversion("ALEXA LogC Film")},
-            //{"   SONY S-Log",       setLinConvert("SONY S-Log"), nil, hasLinConversion("SONY S-Log")},
-            {"   Viper Log",        setLinConvert("Viper Log"), nil, hasLinConversion("Viper Log")},
-            {"   Red Log",          setLinConvert("Red Log"), nil, hasLinConversion("Red Log")},
-            {"   Red Log Film",     setLinConvert("Red Log Film"), nil, hasLinConversion("Red Log Film")},
-            {"   sRGB",             setLinConvert("sRGB"), nil, hasLinConversion("sRGB")},
-            {"   Rec709",           setLinConvert("Rec709"), nil, hasLinConversion("Rec709")},
-            {"   File Gamma 2.2",        setLinConvert("Gamma 2.2"), nil, hasLinConversion("Gamma 2.2")},
-            {"   File Gamma...",         enterFileGamma, nil, fileGammaState},
+            {"   No Conversion",    setLinConvert(""), nil, categoryState("", hasLinConversion(""))},
+            {"   Cineon/DPX Log",   setLinConvert("Cineon Log"), "L", categoryState("", hasLinConversion("Cineon Log"))},
+            {"   ALEXA LogC",       setLinConvert("ALEXA LogC"), nil, categoryState("", hasLinConversion("ALEXA LogC"))},
+            {"   ALEXA LogC Film",  setLinConvert("ALEXA LogC Film"), nil, categoryState("", hasLinConversion("ALEXA LogC Film"))},
+            //{"   SONY S-Log",       setLinConvert("SONY S-Log"), nil, categoryState("", hasLinConversion("SONY S-Log"))},
+            {"   Viper Log",        setLinConvert("Viper Log"), nil, categoryState("", hasLinConversion("Viper Log"))},
+            {"   Red Log",          setLinConvert("Red Log"), nil, categoryState("", hasLinConversion("Red Log"))},
+            {"   Red Log Film",     setLinConvert("Red Log Film"), nil, categoryState("", hasLinConversion("Red Log Film"))},
+            {"   sRGB",             setLinConvert("sRGB"), nil, categoryState("", hasLinConversion("sRGB"))},
+            {"   Rec709",           setLinConvert("Rec709"), nil, categoryState("", hasLinConversion("Rec709"))},
+            {"   File Gamma 2.2",        setLinConvert("Gamma 2.2"), nil, categoryState("", hasLinConversion("Gamma 2.2"))},
+            {"   File Gamma...",         enterFileGamma, nil, categoryState("", fileGammaState)},
             {"_", nil},
-            {"Pre-Cache LUT", ~toggleCacheLUT, nil, isCacheLUTActiveState},
-            {"File LUT",      ~toggleFileLUT, nil, isFileLUTActiveState},
-            {"File CDL",      ~toggleFileCDL, nil, isFileCDLActiveState},
-            {"File ICC",      ~toggleFileICC, nil, isFileICCActiveState},
-            {"Look LUT",      ~toggleLookLUT, nil, isLookLUTActiveState},
-            {"Look CDL",      ~toggleLookCDL, nil, isLookCDLActiveState},
+            {"Pre-Cache LUT", ~toggleCacheLUT, nil, categoryState("", isCacheLUTActiveState)},
+            {"File LUT",      ~toggleFileLUT, nil, categoryState("", isFileLUTActiveState)},
+            {"File CDL",      ~toggleFileCDL, nil, categoryState("", isFileCDLActiveState)},
+            {"File ICC",      ~toggleFileICC, nil, categoryState("", isFileICCActiveState)},
+            {"Look LUT",      ~toggleLookLUT, nil, categoryState("", isLookLUTActiveState)},
+            {"Look CDL",      ~toggleLookCDL, nil, categoryState("", isLookCDLActiveState)},
             {"_", nil},
-            {"Invert", ~toggleInvert, "I", isInvert},
+            {"Invert", ~toggleInvert, "I", categoryState("", isInvert)},
             //  RVHistogram node deprecated to remove from GUI for now
-            //{"Normalize", toggleNormalizeColor, nil, isNormalizingColor},
+            //{"Normalize", toggleNormalizeColor, nil, categoryState("", isNormalizingColor)},
             {"_", nil},
             {"Interactive Edit",      nil, nil, inactiveState },
-            {"    Gamma",      gammaMode,      "y", videoSourcesAndNodeExistState("RVColor")},
-            {"    Color Offset", colorOffsetMode,  nil,  videoSourcesAndNodeExistState("RVColor")},
-            {"    Exposure",   exposureMode,   "e", videoSourcesAndNodeExistState("RVColor")},
-            {"    Saturation", saturationMode, "S", videoSourcesAndNodeExistState("RVColor")},
-            {"    Hue",        hueMode,        "h", videoSourcesAndNodeExistState("RVColor")},
-            {"    Contrast",   contrastMode,   "k", videoSourcesAndNodeExistState("RVColor")},
+            {"    Gamma",      gammaMode,      "y", categoryState("", videoSourcesAndNodeExistState("RVColor"))},
+            {"    Color Offset", colorOffsetMode,  nil,  categoryState("", videoSourcesAndNodeExistState("RVColor"))},
+            {"    Exposure",   exposureMode,   "e", categoryState("", videoSourcesAndNodeExistState("RVColor"))},
+            {"    Saturation", saturationMode, "S", categoryState("", videoSourcesAndNodeExistState("RVColor"))},
+            {"    Hue",        hueMode,        "h", categoryState("", videoSourcesAndNodeExistState("RVColor"))},
+            {"    Contrast",   contrastMode,   "k", categoryState("", videoSourcesAndNodeExistState("RVColor"))},
             {"_", nil},
             {"Range", Menu {
-                {"From Image", ~setColorSpaceAttr("Range","From Image"), nil, matchesColorSpaceAttr("Range","From Image")},
+                {"From Image", ~setColorSpaceAttr("Range","From Image"), nil, categoryState("", matchesColorSpaceAttr("Range","From Image"))},
                 {"_", nil},
-                {"Video Range", ~setColorSpaceAttr("Range","Video Range"), nil, matchesColorSpaceAttr("Range","Video Range")},
-                {"Full Range", ~setColorSpaceAttr("Range","Full Range"), nil, matchesColorSpaceAttr("Range","Full Range")}}},
+                {"Video Range", ~setColorSpaceAttr("Range","Video Range"), nil, categoryState("", matchesColorSpaceAttr("Range","Video Range"))},
+                {"Full Range", ~setColorSpaceAttr("Range","Full Range"), nil, categoryState("", matchesColorSpaceAttr("Range","Full Range"))}}},
             {"_", nil},
-            {"Ignore File Primaries", ~toggleChromaticities, nil, isIgnoringChromaticies},
-            {"Reset All Color", ~resetAllColorParameters, "shift Home", videoSourcesAndNodeExistState("RVColor")}
+            {"Ignore File Primaries", ~toggleChromaticities, nil, categoryState("", isIgnoringChromaticies)},
+            {"Reset All Color", ~resetAllColorParameters, "shift Home", categoryState("", videoSourcesAndNodeExistState("RVColor"))}
             }},
         {"View", buildViewMenu() }
         //{"Debug", buildDebugMenu() }
@@ -6978,358 +6946,358 @@ global bool debugGC = false;
     // passive or active
     //
 
-    bind("user-active", setActiveState);
-    bind("user-inactive", setInactiveState);
+    bind("user-active", categoryAction("", setActiveState));
+    bind("user-inactive", categoryAction("", setInactiveState));
 
     //
     //  If you bind these to something else you are responsible for
     //  drawing/layout of everything
     //
 
-    bind("render", render);
-    bind("layout", layout);
-    bind("render-output-device", renderOutputDevice);
-    bind("pre-render", preRender);
+    bind("render", categoryAction("", render));
+    bind("layout", categoryAction("", layout));
+    bind("render-output-device", categoryAction("", renderOutputDevice));
+    bind("pre-render", categoryAction("", preRender));
 
     //
     //  Missing frames will produce this event
     //
 
-    bind("missing-image", missingImage);
+    bind("missing-image", categoryAction("", missingImage));
 
     //
     //  How pixel blocks are handled (sent from display drivers, etc)
     //
 
-    bind("pixel-block", defaultPixelBlockHandler);
+    bind("pixel-block", categoryAction("", defaultPixelBlockHandler));
 
     //
     //  The main stuff
     //
-    bind("graph-state-change", stateOrInputsChanged, "Graph State Changed");
-    bind("graph-node-inputs-changed", stateOrInputsChanged, "Graph Node Inputs Changed");
+    bind("graph-state-change", categoryAction("", stateOrInputsChanged), "Graph State Changed");
+    bind("graph-node-inputs-changed", categoryAction("", stateOrInputsChanged), "Graph Node Inputs Changed");
 
-    bind("pointer--move", moveCallback);
-    bind("pointer--enter", pointerEnterSession);
-    bind("pointer--activate", windowActivate);
-    bind("pointer--leave", pointerLeaveSession);
-    bind("key-down-- ", togglePlayFunc, "Toggle Play");
-    bind("key-down--(", cycleStackBackward, "Cycle Image Stack Backwards");
-    bind("key-down--)", cycleStackForward, "Cycle Image Stack Forwards");
-    bind("key-down--*", randomLUT, "Apply Random Luminance LUT");
-    bind("key-down--,", incN(-1), "Set Frame Increment to -1 (reverse)");
-    bind("key-down--.", incN(1), "Set Frame Increment to 1 (forward)");
-    bind("key-down--1", pixelRelativeScale(1.0), "Scale 1:1");
-    bind("key-down--2", pixelRelativeScale(2.0), "Scale 2:1");
-    bind("key-down--3", pixelRelativeScale(3.0), "Scale 3:1");
-    bind("key-down--4", pixelRelativeScale(4.0), "Scale 4:1");
-    bind("key-down--5", pixelRelativeScale(5.0), "Scale 5:1");
-    bind("key-down--6", pixelRelativeScale(6.0), "Scale 6:1");
-    bind("key-down--7", pixelRelativeScale(7.0), "Scale 7:1");
-    bind("key-down--8", pixelRelativeScale(8.0), "Scale 8:1");
-    bind("key-down--A", toggleRealtime, "Toggle Real-Time Playback");
-    bind("key-down--C", toggleCacheModeFunc(CacheGreedy), "Toggle Region Caching");
-    bind("key-down--D", toggleDisplayLUT, "Toggle Display LUT");
-    bind("key-down--F", enterFPS, "Enter FPS Value From Keyboard");
-    bind("key-down--G", enterFrame, "Set Frame Number Using Keyboard");
-    bind("key-down--I", toggleInvert, "Toggle Color Invert");
-    bind("key-down--L", setLinConvert("Cineon Log"), "Toggle Cineon Log to Linear Conversion");
-    bind("key-down--M", cycleMatteOpacity, "Cycle Matte Opacity");
-    bind("key-down--P", togglePingPong, "Toggle Ping/Pong Playback");
-    bind("key-down--R", ~reload, "Force Reload of Current Source");
-    bind("key-down--T", toggleLuminanceLUT, "Toggle Current Luminance LUT");
-    bind("key-down--X", toggleFlop, "Flop Image");
-    bind("key-down--Y", toggleFlip, "Flip Image");
-    bind("key-down--[", frameFunc(setInPoint), "Set In Point");
-    bind("key-down--\\", resetInOutPoints, "Reset In/Out Points");
-    bind("key-down--]", frameFunc(setOutPoint), "Set Out Point");
-    bind("key-down--a", showChannel(4), "Show Alpha Channel");
-    bind("key-down--b", showChannel(3), "Show Blue Channel");
-    bind("key-down--c", showChannel(0), "Normal Color Channel Display");
-    bind("key-down--alt--l", ~rotateImage(-90, true), "Rotate Image 90deg Counter-Clockwise");
-    bind("key-down--alt--r", ~rotateImage(90, true), "Rotate Image 90deg Clockwise");
-    bind("key-down--alt--left", previousMarkedFrame, "Go to Previous Marked Frame");
-    bind("key-down--alt--right", nextMarkedFrame, "Go to Next Marked Frame");
-    bind("key-down--<", previousMatchedFrame, "Go to Matching Frame of Previous Source");
-    bind("key-down-->", nextMatchedFrame, "Go to Matching Frame of Next Source");
-    bind("key-down--shift--left", prevView, "Go to Previous View");
-    bind("key-down--shift--right", nextView, "Go to Next View");
-    bind("key-down--control--e", exportAs(, "mov", "Quicktime Export"), "Export Quicktime Movie");
-    bind("key-down--control--q", queryClose, "Close Session");
-    bind("key-down--control--N", clearEverything, "Clear Session");
-    bind("key-down--control--S", saveAs, "Save Session As");
-    bind("key-down--control--i", addMovieOrImageSources(,true,false), "Add Source");
-    bind("key-down--control--s", save, "Save Session");
-    bind("key-down--control--w", queryClose, "Close Session");
-    bind("key-down--control--o", addMovieOrImageSources(,true,false), "Open File");
-    bind("key-down--control--O", openMovieOrImage, "Open in New Session");
-    bind("key-down--control--1", pixelRelativeScale(1.0/1.0), "Scale 1:1");
-    bind("key-down--control--2", pixelRelativeScale(1.0/2.0), "Scale 1:2");
-    bind("key-down--control--3", pixelRelativeScale(1.0/3.0), "Scale 1:3");
-    bind("key-down--control--4", pixelRelativeScale(1.0/4.0), "Scale 1:4");
-    bind("key-down--control--5", pixelRelativeScale(1.0/5.0), "Scale 1:5");
-    bind("key-down--control--6", pixelRelativeScale(1.0/6.0), "Scale 1:6");
-    bind("key-down--control--7", pixelRelativeScale(1.0/7.0), "Scale 1:7");
-    bind("key-down--control--8", pixelRelativeScale(1.0/8.0), "Scale 1:8");
-    bind("key-down--control--l", toggleCacheModeFunc(CacheBuffer), "Toggle Look-Ahead Caching");
-    bind("key-down--control--m", cycleMatte, "Cycle Mattes");
-    bind("key-down--control--left", previousMarkedRange, "Set In/Out to Previous Marked Range");
-    bind("key-down--control--right", nextMarkedRange, "Set In/Out to Next Marked Range");
-    bind("key-down--control--up", expandMarkedRange, "Expand In/Out to Neighboring Marked Ranges");
-    bind("key-down--control--down", contractMarkedRange, "Contract In/Out from Neighboring Marked Ranges");
-    bind("key-down--control--v", globalVolumeMode, "Edit Global Audio Volume");
-    bind("key-down--control--R", ~reloadInOut, "Reload In/Out Region");
-    bind("key-down--control--C", ~loadCurrentSourcesChangedFrames, "Load Changed Frames of Current Sources");
-    bind("key-down--control--f", frameWidth, "Frame Image Width");
-    bind("key-down--down", togglePlayFunc, "Toggle Play");
-    bind("key-down--end", ending, "Go to End of In/Out Region");
-    bind("key-down--f", frameImage, "Frame Image in View");
-    bind("key-down--f1", toggleMenuBar, "Toggle Menu Bar Visibility");
-    bind("key-down--f2", toggleTimeline, "Toggle Heads-Up Timeline");
-    bind("key-down--f3", toggleMotionScope, "Toggle Timeline Magnifier");
-    bind("key-down--f4", toggleInfo, "Toggle Heads-Up Image Info");
-    bind("key-down--f5", toggleColorInspector, "Toggle Heads-Up Color Inspector");
-    bind("key-down--f6", toggleWipe, "Toggle Wipes");
-    bind("key-down--f7", toggleInfoStrip, "Toggle Heads-Up Info Strip");
-    bind("key-down--f8", toggleProcessInfo, "Toggle Heads-Up External Process Progress");
-    bind("key-down--f11", toggleSourceDetails, "Toggle Heads-Up Source Details");
-    bind("key-down--g", showChannel(2), "Show Green Channel");
-    bind("key-down--home", beginning, "Go to Beginning of In/Out Range");
-    bind("key-down--shift--home", resetAllColorParameters, "Reset All Color");
-    bind("key-down--i", toggleInfo, "Toggle Heads-Up Image Info");
-    bind("key-down--l", showChannel(5), "Show Image Luminance");
-    bind("key-down--left", stepBackward1, "Move Back One Frame");
-    bind("key-down--m", toggleMark, "Toggle Mark At Frame");
-    bind("key-down--n", toggleFilter, "Toggle Nearest Neighbor/Linear Filter");
-    bind("key-down--p", togglePremult, "Toggle Premult Display");
-    bind("key-down--page-down", previousMarkedRange, "Set In/Out to Previous Marked Range");
-    bind("key-down--page-up", nextMarkedRange, "Set In/Out to Next Marked Range");
-    bind("key-down--control--p", togglePresentationMode, "Toggle Presentation Mode");
-    bind("key-down--r", showChannel(1), "Show Red Channel");
-    bind("key-down--right", stepForward1, "Step Forward 1 Frame");
-    bind("key-down--t", toggleTimeline, "Toggle Heads-Up Timeline");
-    bind("key-down--tab", toggleTimeline, "Toggle Heads-Up Timeline");
-    bind("key-down--up", toggleForwardsBackwards, "Toggle Forward/Backward Playback");
-    bind("key-down--v", enterDispGamma, "Enter Display Gamma");
-    bind("key-down--|", setInOutMarkedRange, "Set In/Out Range From Surrounding Marks");
-    bind("key-down--~", toggleTimeline, "Toggle Timeline");
-    bind("pointer--wheeldown", stepForward1, "Step Forward 1 Frame");
-    bind("pointer--wheelup", stepBackward1, "Step Backward 1 Frame");
-    bind("pointer-3--wheeldown", stepForward10, "Step Forward 10 Frames");
-    bind("pointer-3--wheelup", stepBackward10, "Step Backward 10 Frames");
-    bind("pointer-2-3--wheeldown", stepForward100, "Step Forward 100 Frames");
-    bind("pointer-2-3--wheelup", stepBackward100, "Step Backward 100 Frames");
-    bind("pointer--control--wheeldown", stepForward10, "Step Forward 10 Frames");
-    bind("pointer--control--wheelup", stepBackward10, "Step Backward 10 Frames");
-    bind("pointer--alt-control--wheeldown", stepForward100, "Step Forward 100 Frames");
-    bind("pointer--alt-control--wheelup", stepBackward100, "Step Backward 100 Frames");
-    bind("pointer-1--alt--drag", dragMoveLocked(false,), "Translate View");
-    bind("pointer-1--alt-shift--drag", dragMoveLocked(true,), "Translate View");
-    bind("pointer-1--alt--push", beginMoveOrZoom);
-    bind("pointer-1--alt-shift--push", beginMoveOrZoom);
-    bind("pointer-1--alt-control--drag", dragMoveLocked(false,), "Translate View");
-    bind("pointer-1--alt-shift-control--drag", dragMoveLocked(true,), "Translate View");
-    bind("pointer-1--alt-control--push", beginMoveOrZoom);
-    bind("pointer-1--alt-shift-control--push", beginMoveOrZoom);
-    bind("pointer-1--control--drag", dragZoom);
-    bind("pointer-1--control--push", beginMoveOrZoom);
-    bind("pointer-1--control-shift--push", beginMoveOrZoom);
-    bind("pointer-1--drag", dragScrub(false,), "Scrub Frames");
-    bind("pointer-1--push", beginScrub);
-    bind("pointer-1--release", releaseScrub);
-    bind("pointer-1--double",  doubleClick);
-    bind("pointer-1-2--alt--drag", dragZoom, "Zoom View");
-    bind("pointer-1-2--alt--push", beginMoveOrZoom);
-    bind("pointer-1-2--alt-shift--push", beginMoveOrZoom);
-    bind("pointer-2--alt--drag", dragMoveLocked(false,), "Translate View");
-    bind("pointer-2--alt-shift--drag", dragMoveLocked(true,), "Translate View");
-    bind("pointer-2--alt--push", beginMoveOrZoom);
-    bind("pointer-2--alt-shift--push", beginMoveOrZoom);
-    bind("pointer-2--control--drag", dragZoom, "Zoom View");
-    bind("pointer-2--control--push", beginMoveOrZoom);
-    bind("pointer-2--control-shift--push", beginMoveOrZoom);
-    bind("pointer-2--drag", dragMoveLocked(false,), "Translate View");
-    bind("pointer-2--shift--drag", dragMoveLocked(true,), "Translate View");
-    bind("pointer-2--push", beginMoveOrZoom);
-    bind("pointer-2--shift--push", beginMoveOrZoom);
-    bind("pointer-3--push", popupMenu(,nil), "Popup Menu");
+    bind("pointer--move", categoryAction("", moveCallback));
+    bind("pointer--enter", categoryAction("", pointerEnterSession));
+    bind("pointer--activate", categoryAction("", windowActivate));
+    bind("pointer--leave", categoryAction("", pointerLeaveSession));
+    bind("key-down-- ", categoryAction("", togglePlayFunc), "Toggle Play");
+    bind("key-down--(", categoryAction("", cycleStackBackward), "Cycle Image Stack Backwards");
+    bind("key-down--)", categoryAction("", cycleStackForward), "Cycle Image Stack Forwards");
+    bind("key-down--*", categoryAction("", randomLUT), "Apply Random Luminance LUT");
+    bind("key-down--,", categoryAction("", incN(-1)), "Set Frame Increment to -1 (reverse)");
+    bind("key-down--.", categoryAction("", incN(1)), "Set Frame Increment to 1 (forward)");
+    bind("key-down--1", categoryAction("", pixelRelativeScale(1.0)), "Scale 1:1");
+    bind("key-down--2", categoryAction("", pixelRelativeScale(2.0)), "Scale 2:1");
+    bind("key-down--3", categoryAction("", pixelRelativeScale(3.0)), "Scale 3:1");
+    bind("key-down--4", categoryAction("", pixelRelativeScale(4.0)), "Scale 4:1");
+    bind("key-down--5", categoryAction("", pixelRelativeScale(5.0)), "Scale 5:1");
+    bind("key-down--6", categoryAction("", pixelRelativeScale(6.0)), "Scale 6:1");
+    bind("key-down--7", categoryAction("", pixelRelativeScale(7.0)), "Scale 7:1");
+    bind("key-down--8", categoryAction("", pixelRelativeScale(8.0)), "Scale 8:1");
+    bind("key-down--A", categoryAction("", toggleRealtime), "Toggle Real-Time Playback");
+    bind("key-down--C", categoryAction("", toggleCacheModeFunc(CacheGreedy)), "Toggle Region Caching");
+    bind("key-down--D", categoryAction("", toggleDisplayLUT), "Toggle Display LUT");
+    bind("key-down--F", categoryAction("", enterFPS), "Enter FPS Value From Keyboard");
+    bind("key-down--G", categoryAction("", enterFrame), "Set Frame Number Using Keyboard");
+    bind("key-down--I", categoryAction("", toggleInvert), "Toggle Color Invert");
+    bind("key-down--L", categoryAction("", setLinConvert("Cineon Log")), "Toggle Cineon Log to Linear Conversion");
+    bind("key-down--M", categoryAction("", cycleMatteOpacity), "Cycle Matte Opacity");
+    bind("key-down--P", categoryAction("", togglePingPong), "Toggle Ping/Pong Playback");
+    bind("key-down--R", categoryAction("", ~reload), "Force Reload of Current Source");
+    bind("key-down--T", categoryAction("", toggleLuminanceLUT), "Toggle Current Luminance LUT");
+    bind("key-down--X", categoryAction("", toggleFlop), "Flop Image");
+    bind("key-down--Y", categoryAction("", toggleFlip), "Flip Image");
+    bind("key-down--[", categoryAction("", frameFunc(setInPoint)), "Set In Point");
+    bind("key-down--\\", categoryAction("", resetInOutPoints), "Reset In/Out Points");
+    bind("key-down--]", categoryAction("", frameFunc(setOutPoint)), "Set Out Point");
+    bind("key-down--a", categoryAction("", showChannel(4)), "Show Alpha Channel");
+    bind("key-down--b", categoryAction("", showChannel(3)), "Show Blue Channel");
+    bind("key-down--c", categoryAction("", showChannel(0)), "Normal Color Channel Display");
+    bind("key-down--alt--l", categoryAction("", ~rotateImage(-90, true)), "Rotate Image 90deg Counter-Clockwise");
+    bind("key-down--alt--r", categoryAction("", ~rotateImage(90, true)), "Rotate Image 90deg Clockwise");
+    bind("key-down--alt--left", categoryAction("", previousMarkedFrame), "Go to Previous Marked Frame");
+    bind("key-down--alt--right", categoryAction("", nextMarkedFrame), "Go to Next Marked Frame");
+    bind("key-down--<", categoryAction("", previousMatchedFrame), "Go to Matching Frame of Previous Source");
+    bind("key-down-->", categoryAction("", nextMatchedFrame), "Go to Matching Frame of Next Source");
+    bind("key-down--shift--left", categoryAction("", prevView), "Go to Previous View");
+    bind("key-down--shift--right", categoryAction("", nextView), "Go to Next View");
+    bind("key-down--control--e", categoryAction("", exportAs(, "mov", "Quicktime Export")), "Export Quicktime Movie");
+    bind("key-down--control--q", categoryAction("", queryClose), "Close Session");
+    bind("key-down--control--N", categoryAction("", clearEverything), "Clear Session");
+    bind("key-down--control--S", categoryAction("", saveAs), "Save Session As");
+    bind("key-down--control--i", categoryAction("", addMovieOrImageSources(,true,false)), "Add Source");
+    bind("key-down--control--s", categoryAction("", save), "Save Session");
+    bind("key-down--control--w", categoryAction("", queryClose), "Close Session");
+    bind("key-down--control--o", categoryAction("", addMovieOrImageSources(,true,false)), "Open File");
+    bind("key-down--control--O", categoryAction("", openMovieOrImage), "Open in New Session");
+    bind("key-down--control--1", categoryAction("", pixelRelativeScale(1.0/1.0)), "Scale 1:1");
+    bind("key-down--control--2", categoryAction("", pixelRelativeScale(1.0/2.0)), "Scale 1:2");
+    bind("key-down--control--3", categoryAction("", pixelRelativeScale(1.0/3.0)), "Scale 1:3");
+    bind("key-down--control--4", categoryAction("", pixelRelativeScale(1.0/4.0)), "Scale 1:4");
+    bind("key-down--control--5", categoryAction("", pixelRelativeScale(1.0/5.0)), "Scale 1:5");
+    bind("key-down--control--6", categoryAction("", pixelRelativeScale(1.0/6.0)), "Scale 1:6");
+    bind("key-down--control--7", categoryAction("", pixelRelativeScale(1.0/7.0)), "Scale 1:7");
+    bind("key-down--control--8", categoryAction("", pixelRelativeScale(1.0/8.0)), "Scale 1:8");
+    bind("key-down--control--l", categoryAction("", toggleCacheModeFunc(CacheBuffer)), "Toggle Look-Ahead Caching");
+    bind("key-down--control--m", categoryAction("", cycleMatte), "Cycle Mattes");
+    bind("key-down--control--left", categoryAction("", previousMarkedRange), "Set In/Out to Previous Marked Range");
+    bind("key-down--control--right", categoryAction("", nextMarkedRange), "Set In/Out to Next Marked Range");
+    bind("key-down--control--up", categoryAction("", expandMarkedRange), "Expand In/Out to Neighboring Marked Ranges");
+    bind("key-down--control--down", categoryAction("", contractMarkedRange), "Contract In/Out from Neighboring Marked Ranges");
+    bind("key-down--control--v", categoryAction("", globalVolumeMode), "Edit Global Audio Volume");
+    bind("key-down--control--R", categoryAction("", ~reloadInOut), "Reload In/Out Region");
+    bind("key-down--control--C", categoryAction("", ~loadCurrentSourcesChangedFrames), "Load Changed Frames of Current Sources");
+    bind("key-down--control--f", categoryAction("", frameWidth), "Frame Image Width");
+    bind("key-down--down", categoryAction("", togglePlayFunc), "Toggle Play");
+    bind("key-down--end", categoryAction("", ending), "Go to End of In/Out Region");
+    bind("key-down--f", categoryAction("", frameImage), "Frame Image in View");
+    bind("key-down--f1", categoryAction("", toggleMenuBar), "Toggle Menu Bar Visibility");
+    bind("key-down--f2", categoryAction("", toggleTimeline), "Toggle Heads-Up Timeline");
+    bind("key-down--f3", categoryAction("", toggleMotionScope), "Toggle Timeline Magnifier");
+    bind("key-down--f4", categoryAction("", toggleInfo), "Toggle Heads-Up Image Info");
+    bind("key-down--f5", categoryAction("", toggleColorInspector), "Toggle Heads-Up Color Inspector");
+    bind("key-down--f6", categoryAction("", toggleWipe), "Toggle Wipes");
+    bind("key-down--f7", categoryAction("", toggleInfoStrip), "Toggle Heads-Up Info Strip");
+    bind("key-down--f8", categoryAction("", toggleProcessInfo), "Toggle Heads-Up External Process Progress");
+    bind("key-down--f11", categoryAction("", toggleSourceDetails), "Toggle Heads-Up Source Details");
+    bind("key-down--g", categoryAction("", showChannel(2)), "Show Green Channel");
+    bind("key-down--home", categoryAction("", beginning), "Go to Beginning of In/Out Range");
+    bind("key-down--shift--home", categoryAction("", resetAllColorParameters), "Reset All Color");
+    bind("key-down--i", categoryAction("", toggleInfo), "Toggle Heads-Up Image Info");
+    bind("key-down--l", categoryAction("", showChannel(5)), "Show Image Luminance");
+    bind("key-down--left", categoryAction("", stepBackward1), "Move Back One Frame");
+    bind("key-down--m", categoryAction("", toggleMark), "Toggle Mark At Frame");
+    bind("key-down--n", categoryAction("", toggleFilter), "Toggle Nearest Neighbor/Linear Filter");
+    bind("key-down--p", categoryAction("", togglePremult), "Toggle Premult Display");
+    bind("key-down--page-down", categoryAction("", previousMarkedRange), "Set In/Out to Previous Marked Range");
+    bind("key-down--page-up", categoryAction("", nextMarkedRange), "Set In/Out to Next Marked Range");
+    bind("key-down--control--p", categoryAction("", togglePresentationMode), "Toggle Presentation Mode");
+    bind("key-down--r", categoryAction("", showChannel(1)), "Show Red Channel");
+    bind("key-down--right", categoryAction("", stepForward1), "Step Forward 1 Frame");
+    bind("key-down--t", categoryAction("", toggleTimeline), "Toggle Heads-Up Timeline");
+    bind("key-down--tab", categoryAction("", toggleTimeline), "Toggle Heads-Up Timeline");
+    bind("key-down--up", categoryAction("", toggleForwardsBackwards), "Toggle Forward/Backward Playback");
+    bind("key-down--v", categoryAction("", enterDispGamma), "Enter Display Gamma");
+    bind("key-down--|", categoryAction("", setInOutMarkedRange), "Set In/Out Range From Surrounding Marks");
+    bind("key-down--~", categoryAction("", toggleTimeline), "Toggle Timeline");
+    bind("pointer--wheeldown", categoryAction("", stepForward1), "Step Forward 1 Frame");
+    bind("pointer--wheelup", categoryAction("", stepBackward1), "Step Backward 1 Frame");
+    bind("pointer-3--wheeldown", categoryAction("", stepForward10), "Step Forward 10 Frames");
+    bind("pointer-3--wheelup", categoryAction("", stepBackward10), "Step Backward 10 Frames");
+    bind("pointer-2-3--wheeldown", categoryAction("", stepForward100), "Step Forward 100 Frames");
+    bind("pointer-2-3--wheelup", categoryAction("", stepBackward100), "Step Backward 100 Frames");
+    bind("pointer--control--wheeldown", categoryAction("", stepForward10), "Step Forward 10 Frames");
+    bind("pointer--control--wheelup", categoryAction("", stepBackward10), "Step Backward 10 Frames");
+    bind("pointer--alt-control--wheeldown", categoryAction("", stepForward100), "Step Forward 100 Frames");
+    bind("pointer--alt-control--wheelup", categoryAction("", stepBackward100), "Step Backward 100 Frames");
+    bind("pointer-1--alt--drag", categoryAction("", dragMoveLocked(false,)), "Translate View");
+    bind("pointer-1--alt-shift--drag", categoryAction("", dragMoveLocked(true,)), "Translate View");
+    bind("pointer-1--alt--push", categoryAction("", beginMoveOrZoom));
+    bind("pointer-1--alt-shift--push", categoryAction("", beginMoveOrZoom));
+    bind("pointer-1--alt-control--drag", categoryAction("", dragMoveLocked(false,)), "Translate View");
+    bind("pointer-1--alt-shift-control--drag", categoryAction("", dragMoveLocked(true,)), "Translate View");
+    bind("pointer-1--alt-control--push", categoryAction("", beginMoveOrZoom));
+    bind("pointer-1--alt-shift-control--push", categoryAction("", beginMoveOrZoom));
+    bind("pointer-1--control--drag", categoryAction("", dragZoom));
+    bind("pointer-1--control--push", categoryAction("", beginMoveOrZoom));
+    bind("pointer-1--control-shift--push", categoryAction("", beginMoveOrZoom));
+    bind("pointer-1--drag", categoryAction("", dragScrub(false,)), "Scrub Frames");
+    bind("pointer-1--push", categoryAction("", beginScrub));
+    bind("pointer-1--release", categoryAction("", releaseScrub));
+    bind("pointer-1--double", categoryAction("",  doubleClick));
+    bind("pointer-1-2--alt--drag", categoryAction("", dragZoom), "Zoom View");
+    bind("pointer-1-2--alt--push", categoryAction("", beginMoveOrZoom));
+    bind("pointer-1-2--alt-shift--push", categoryAction("", beginMoveOrZoom));
+    bind("pointer-2--alt--drag", categoryAction("", dragMoveLocked(false,)), "Translate View");
+    bind("pointer-2--alt-shift--drag", categoryAction("", dragMoveLocked(true,)), "Translate View");
+    bind("pointer-2--alt--push", categoryAction("", beginMoveOrZoom));
+    bind("pointer-2--alt-shift--push", categoryAction("", beginMoveOrZoom));
+    bind("pointer-2--control--drag", categoryAction("", dragZoom), "Zoom View");
+    bind("pointer-2--control--push", categoryAction("", beginMoveOrZoom));
+    bind("pointer-2--control-shift--push", categoryAction("", beginMoveOrZoom));
+    bind("pointer-2--drag", categoryAction("", dragMoveLocked(false,)), "Translate View");
+    bind("pointer-2--shift--drag", categoryAction("", dragMoveLocked(true,)), "Translate View");
+    bind("pointer-2--push", categoryAction("", beginMoveOrZoom));
+    bind("pointer-2--shift--push", categoryAction("", beginMoveOrZoom));
+    bind("pointer-3--push", categoryAction("", popupMenu(,nil)), "Popup Menu");
 
-    bind("toggle-hud-info-widget", toggleInfo, "Toggle info widget via event");
-    bind("toggle-hud-timeline-widget", toggleTimeline, "Toggle timeline widget via event");
-    bind("toggle-hud-timeline-mag-widget", toggleMotionScope, "Toggle timeline magnifier widget via event");
+    bind("toggle-hud-info-widget", categoryAction("", toggleInfo), "Toggle info widget via event");
+    bind("toggle-hud-timeline-widget", categoryAction("", toggleTimeline), "Toggle timeline widget via event");
+    bind("toggle-hud-timeline-mag-widget", categoryAction("", toggleMotionScope), "Toggle timeline magnifier widget via event");
 
     //
     //  back-door scrubbing, works even if scrubbing is "disabled"
     //
-    bind("pointer-1--control-shift--push", beginScrub);
-    bind("pointer-1--control-shift--drag", dragScrub(true,), "Scrub Frames");
-    bind("pointer-1--control-shift--release", releaseScrub);
-    bind("stylus-pen--control-shift--push", beginScrub);
-    bind("stylus-pen--control-shift--drag", dragScrub(true,), "Scrub Frames");
-    bind("stylus-pen--control-shift--release", releaseScrub);
+    bind("pointer-1--control-shift--push", categoryAction("", beginScrub));
+    bind("pointer-1--control-shift--drag", categoryAction("", dragScrub(true,)), "Scrub Frames");
+    bind("pointer-1--control-shift--release", categoryAction("", releaseScrub));
+    bind("stylus-pen--control-shift--push", categoryAction("", beginScrub));
+    bind("stylus-pen--control-shift--drag", categoryAction("", dragScrub(true,)), "Scrub Frames");
+    bind("stylus-pen--control-shift--release", categoryAction("", releaseScrub));
 
-    bind("pointer-1--shift--push", \: (void; Event event)
+    bind("pointer-1--shift--push", categoryAction("", \: (void; Event event)
     {
         toggleColorInspector();
         event.reject();  // it will find the bindings in the inspector
-    },
+    }),
     "Color Inspector");
 
-    bind("stylus-pen--shift--push", \: (void; Event event)
+    bind("stylus-pen--shift--push", categoryAction("", \: (void; Event event)
     {
         toggleColorInspector();
         event.reject();  // it will find the bindings in the inspector
-    },
+    }),
     "Color Inspector");
 
-    bind("stylus-pen--move", moveCallback);
-    bind("stylus-pen--enter", pointerEnterSession);
-    bind("stylus-pen--leave", pointerLeaveSession);
-    bind("stylus-pen--alt--drag", dragMoveLocked(false,), "Translate View");
-    bind("stylus-pen--alt-shift--drag", dragMoveLocked(true,), "Translate View");
-    bind("stylus-pen--alt--push", beginMoveOrZoom);
-    bind("stylus-pen--alt-shift--push", beginMoveOrZoom);
-    bind("stylus-pen--alt-control--drag", dragMoveLocked(false,), "Translate View");
-    bind("stylus-pen--alt-shift-control--drag", dragMoveLocked(true,), "Translate View");
-    bind("stylus-pen--alt-control--push", beginMoveOrZoom);
-    bind("stylus-pen--alt-shift-control--push", beginMoveOrZoom);
-    bind("stylus-pen--control--drag", dragZoom);
-    bind("stylus-pen--control--push", beginMoveOrZoom);
-    bind("stylus-pen--control-shift--push", beginMoveOrZoom);
-    bind("stylus-pen--drag", dragScrub(false,), "Scrub Frames");
-    bind("stylus-pen--push", beginScrub);
-    bind("stylus-pen--release", releaseScrub);
-    bind("stylus-eraser--push", popupMenu(,nil), "Popup Menu");
+    bind("stylus-pen--move", categoryAction("", moveCallback));
+    bind("stylus-pen--enter", categoryAction("", pointerEnterSession));
+    bind("stylus-pen--leave", categoryAction("", pointerLeaveSession));
+    bind("stylus-pen--alt--drag", categoryAction("", dragMoveLocked(false,)), "Translate View");
+    bind("stylus-pen--alt-shift--drag", categoryAction("", dragMoveLocked(true,)), "Translate View");
+    bind("stylus-pen--alt--push", categoryAction("", beginMoveOrZoom));
+    bind("stylus-pen--alt-shift--push", categoryAction("", beginMoveOrZoom));
+    bind("stylus-pen--alt-control--drag", categoryAction("", dragMoveLocked(false,)), "Translate View");
+    bind("stylus-pen--alt-shift-control--drag", categoryAction("", dragMoveLocked(true,)), "Translate View");
+    bind("stylus-pen--alt-control--push", categoryAction("", beginMoveOrZoom));
+    bind("stylus-pen--alt-shift-control--push", categoryAction("", beginMoveOrZoom));
+    bind("stylus-pen--control--drag", categoryAction("", dragZoom));
+    bind("stylus-pen--control--push", categoryAction("", beginMoveOrZoom));
+    bind("stylus-pen--control-shift--push", categoryAction("", beginMoveOrZoom));
+    bind("stylus-pen--drag", categoryAction("", dragScrub(false,)), "Scrub Frames");
+    bind("stylus-pen--push", categoryAction("", beginScrub));
+    bind("stylus-pen--release", categoryAction("", releaseScrub));
+    bind("stylus-eraser--push", categoryAction("", popupMenu(,nil)), "Popup Menu");
 
-    bind("key-down--alt--alt", noop, "Intercept Menu Navigation");
-    bind("key-up--alt--alt", noop, "Intercept Menu Navigation");
+    bind("key-down--alt--alt", categoryAction("", noop), "Intercept Menu Navigation");
+    bind("key-up--alt--alt", categoryAction("", noop), "Intercept Menu Navigation");
 
-    bind("remote-connection-start", ~activateSync, "Auto start sync mode");
+    bind("remote-connection-start", categoryAction("", ~activateSync), "Auto start sync mode");
 
-    bind("view-resized", viewResized, "RV View Resized");
-    bind("margins-changed", marginsChanged, "RV View Margins Changed");
-    bind("state-initialized", stateInitialized, "RVUI State Initialized");
+    bind("view-resized", categoryAction("", viewResized), "RV View Resized");
+    bind("margins-changed", categoryAction("", marginsChanged), "RV View Margins Changed");
+    bind("state-initialized", categoryAction("", stateInitialized), "RVUI State Initialized");
 
-    bind("key-down--keypad-enter", enterFrame, "Set Frame Number Using Keyboard");
-    bindRegex("default", "global", "key-down--keypad-[0-9.].*", enterFrame);
-    bindRegex("default", "global", ".*--caplock.*", lockWarning(,"cap-lock is ON"));
-    bindRegex("default", "global", ".*--scrolllock.*", lockWarning(,"scroll-lock is ON"));
+    bind("key-down--keypad-enter", categoryAction("", enterFrame), "Set Frame Number Using Keyboard");
+    bindRegex("default", "global", "key-down--keypad-[0-9.].*", categoryAction("", enterFrame));
+    bindRegex("default", "global", ".*--caplock.*", categoryAction("", lockWarning(,"cap-lock is ON")));
+    bindRegex("default", "global", ".*--scrolllock.*", categoryAction("", lockWarning(,"scroll-lock is ON")));
 
-    bindRegex("default", "global", "dragdrop--.*enter", dragEnter);
-    bindRegex("default", "global", "dragdrop--.*move", dragShow);
-    bindRegex("default", "global", "dragdrop--.*leave", dragLeave);
-    bindRegex("default", "global", "dragdrop--.*release", dragRelease);
+    bindRegex("default", "global", "dragdrop--.*enter", categoryAction("", dragEnter));
+    bindRegex("default", "global", "dragdrop--.*move", categoryAction("", dragShow));
+    bindRegex("default", "global", "dragdrop--.*leave", categoryAction("", dragLeave));
+    bindRegex("default", "global", "dragdrop--.*release", categoryAction("", dragRelease));
 
     //
     //  Hack to "scrub" float parameters
     //
 
-    bind("key-down--e", exposureMode, "Edit Current Source Relative Exposure");
-    bind("key-down--S", saturationMode, "Edit Current Source Saturation");
-    bind("key-down--h", hueMode, "Edit Current Source Hue");
-    bind("key-down--y", gammaMode, "Edit Current Source Gamma");
-    bind("key-down--k", contrastMode, "Edit Current Source Contrast");
-    bind("key-down--B", brightnessMode, "Edit Display Brightness");
-    bind("default", "paramscrub", "pointer-1--push", beginParamScrub);
-    bind("default", "paramscrub", "pointer-1--drag", dragParamScrub, "Scrub Modify");
-    bind("default", "paramscrub", "pointer-1--release", releaseParam);
-    bind("default", "paramscrub", "stylus-pen--push", beginParamScrub);
-    bind("default", "paramscrub", "stylus-pen--drag", dragParamScrub, "Scrub Modify");
-    bind("default", "paramscrub", "stylus-pen--release", releaseParam);
-    bind("default", "paramscrub", "key-down--?", helpParam, "Help on Edit");
-    bind("default", "paramscrub", "key-down--R", resetParam, "Reset Edit to Default");
-    bind("default", "paramscrub", "key-down--delete", resetParam, "Reset Edit to Default");
-    bind("default", "paramscrub", "key-down--backspace", resetParam, "Reset Edit to Default");
-    bind("default", "paramscrub", "key-down--s", selectParamTile, "Select Tile for Param Editing");
-    bind("default", "paramscrub", "key-down--r", setParamChannel(0,), "Edit Red Channel");
-    bind("default", "paramscrub", "key-down--g", setParamChannel(1,), "Edit Green Channel");
-    bind("default", "paramscrub", "key-down--b", setParamChannel(2,), "Edit Blue Channel");
-    bind("default", "paramscrub", "key-down--c", setParamChannel(-1,), "Edit All Channels");
-    bind("default", "paramscrub", "key-down--l", toggleParamLocked, "Lock/Unlock Param Edit Mode");
-    bind("default", "paramscrub", "key-down--=", incrementParam, "Edit Increment");
-    bind("default", "paramscrub", "key-down---", decrementParam, "Edit Decrement");
-    bind("default", "paramscrub", "key-down--+", incrementParam, "Edit Increment");
-    bind("default", "paramscrub", "key-down--_", decrementParam, "Edit Decrement");
-    bind("default", "paramscrub", "key-down--enter", enterParam, "Edit Enter Value Directly");
-    bind("default", "paramscrub", "key-down--keypad-enter", enterParam, "Edit Enter Value Directly");
-    bind("default", "paramscrub", "pointer--wheelup", incrementParam, "Edit Increment");
-    bind("default", "paramscrub", "pointer--wheeldown", decrementParam, "Edit Decrement");
-    bindRegex("default", "paramscrub", "key-down--(keypad-)?[0-9.].*", enterParam, "Edit Enter Value Directly and Self Insert");
-    bindRegex("default", "paramscrub", "key-down-- ", releaseParamForce);
-    bindRegex("default", "paramscrub", "key-down--escape", releaseParamForce);
-    bindRegex("default", "paramscrub", "key-down--q", releaseParamForce);
-    bindRegex("default", "paramscrub", "key-down.*", releaseParam);
+    bind("key-down--e", categoryAction("", exposureMode), "Edit Current Source Relative Exposure");
+    bind("key-down--S", categoryAction("", saturationMode), "Edit Current Source Saturation");
+    bind("key-down--h", categoryAction("", hueMode), "Edit Current Source Hue");
+    bind("key-down--y", categoryAction("", gammaMode), "Edit Current Source Gamma");
+    bind("key-down--k", categoryAction("", contrastMode), "Edit Current Source Contrast");
+    bind("key-down--B", categoryAction("", brightnessMode), "Edit Display Brightness");
+    bind("default", "paramscrub", "pointer-1--push", categoryAction("", beginParamScrub));
+    bind("default", "paramscrub", "pointer-1--drag", categoryAction("", dragParamScrub), "Scrub Modify");
+    bind("default", "paramscrub", "pointer-1--release", categoryAction("", releaseParam));
+    bind("default", "paramscrub", "stylus-pen--push", categoryAction("", beginParamScrub));
+    bind("default", "paramscrub", "stylus-pen--drag", categoryAction("", dragParamScrub), "Scrub Modify");
+    bind("default", "paramscrub", "stylus-pen--release", categoryAction("", releaseParam));
+    bind("default", "paramscrub", "key-down--?", categoryAction("", helpParam), "Help on Edit");
+    bind("default", "paramscrub", "key-down--R", categoryAction("", resetParam), "Reset Edit to Default");
+    bind("default", "paramscrub", "key-down--delete", categoryAction("", resetParam), "Reset Edit to Default");
+    bind("default", "paramscrub", "key-down--backspace", categoryAction("", resetParam), "Reset Edit to Default");
+    bind("default", "paramscrub", "key-down--s", categoryAction("", selectParamTile), "Select Tile for Param Editing");
+    bind("default", "paramscrub", "key-down--r", categoryAction("", setParamChannel(0,)), "Edit Red Channel");
+    bind("default", "paramscrub", "key-down--g", categoryAction("", setParamChannel(1,)), "Edit Green Channel");
+    bind("default", "paramscrub", "key-down--b", categoryAction("", setParamChannel(2,)), "Edit Blue Channel");
+    bind("default", "paramscrub", "key-down--c", categoryAction("", setParamChannel(-1,)), "Edit All Channels");
+    bind("default", "paramscrub", "key-down--l", categoryAction("", toggleParamLocked), "Lock/Unlock Param Edit Mode");
+    bind("default", "paramscrub", "key-down--=", categoryAction("", incrementParam), "Edit Increment");
+    bind("default", "paramscrub", "key-down---", categoryAction("", decrementParam), "Edit Decrement");
+    bind("default", "paramscrub", "key-down--+", categoryAction("", incrementParam), "Edit Increment");
+    bind("default", "paramscrub", "key-down--_", categoryAction("", decrementParam), "Edit Decrement");
+    bind("default", "paramscrub", "key-down--enter", categoryAction("", enterParam), "Edit Enter Value Directly");
+    bind("default", "paramscrub", "key-down--keypad-enter", categoryAction("", enterParam), "Edit Enter Value Directly");
+    bind("default", "paramscrub", "pointer--wheelup", categoryAction("", incrementParam), "Edit Increment");
+    bind("default", "paramscrub", "pointer--wheeldown", categoryAction("", decrementParam), "Edit Decrement");
+    bindRegex("default", "paramscrub", "key-down--(keypad-)?[0-9.].*", categoryAction("", enterParam), "Edit Enter Value Directly and Self Insert");
+    bindRegex("default", "paramscrub", "key-down-- ", categoryAction("", releaseParamForce));
+    bindRegex("default", "paramscrub", "key-down--escape", categoryAction("", releaseParamForce));
+    bindRegex("default", "paramscrub", "key-down--q", categoryAction("", releaseParamForce));
+    bindRegex("default", "paramscrub", "key-down.*", categoryAction("", releaseParam));
 
-    bind("default", "textentry", "key-down--enter", commitEntry);
-    bind("default", "textentry", "key-down--keypad-enter", commitEntry);
-    bind("default", "textentry", "key-down--backspace", backwardDeleteChar);
-    bind("default", "textentry", "key-down--delete", backwardDeleteChar);
-    bind("default", "textentry", "key-down--escape", cancelEntry);
-    bind("default", "textentry", "key-down--control--a", killAllText);
-    bind("default", "textentry", "key-down--meta--a", killAllText);
-    bindRegex("default", "textentry", "^key-down--..+", ignoreEntry);
-    bindRegex("default", "textentry", "^key-down.*", selfInsert);
-    bindRegex("default", "textentry", "^pointer-.*--push", cancelEntry);
+    bind("default", "textentry", "key-down--enter", categoryAction("", commitEntry));
+    bind("default", "textentry", "key-down--keypad-enter", categoryAction("", commitEntry));
+    bind("default", "textentry", "key-down--backspace", categoryAction("", backwardDeleteChar));
+    bind("default", "textentry", "key-down--delete", categoryAction("", backwardDeleteChar));
+    bind("default", "textentry", "key-down--escape", categoryAction("", cancelEntry));
+    bind("default", "textentry", "key-down--control--a", categoryAction("", killAllText));
+    bind("default", "textentry", "key-down--meta--a", categoryAction("", killAllText));
+    bindRegex("default", "textentry", "^key-down--..+", categoryAction("", ignoreEntry));
+    bindRegex("default", "textentry", "^key-down.*", categoryAction("", selfInsert));
+    bindRegex("default", "textentry", "^pointer-.*--push", categoryAction("", cancelEntry));
 
-    bind("default", "stereo", "key-down--a", setStereo("anaglyph"), "Anaglyph Mode");
-    bind("default", "stereo", "key-down--l", setStereo("lumanaglyph"), "Luminance Anaglyph Mode");
-    bind("default", "stereo", "key-down--d", setStereo("checker"), "Checked Stereo Mode");
-    bind("default", "stereo", "key-down--k", setStereo("scanline"), "Scanline Stereo Mode");
-    bind("default", "stereo", "key-down--s", setStereo("pair"), "Side-by-Side Stereo Mode");
-    bind("default", "stereo", "key-down--p", setStereo("pair"), "Side-by-Side Stereo Mode");
-    bind("default", "stereo", "key-down--m", setStereo("mirror"), "Mirrored Side-by-Side Stereo Mode");
-    bind("default", "stereo", "key-down--z", setStereo("hsqueezed"), "Horizontal Squeezed Stereo Mode");
-    bind("default", "stereo", "key-down--v", setStereo("vsqueezed"), "Vertical Squeezed Stereo Mode");
-    bind("default", "stereo", "key-down--h", setStereo("hardware"), "Hardware Stereo Mode");
-    bind("default", "stereo", "key-down--,", setStereo("left"), "Left Eye Only Stereo Mode");
-    bind("default", "stereo", "key-down--.", setStereo("right"), "Right Eye Only Stereo Mode");
-    bind("default", "stereo", "key-down--<", setStereo("left"), "Left Eye Only Stereo Mode");
-    bind("default", "stereo", "key-down-->", setStereo("right"), "Right Eye Only Stereo Mode");
-    bind("default", "stereo", "key-down--O", setStereo("off"), "Stereo Off");
-    bind("default", "stereo", "key-down--S", toggleSwapEyes, "Swap Eyes");
-    bind("default", "stereo", "key-down--o", stereoOffsetMode, "Edit Stereo Offset");
-    bind("default", "stereo", "key-down--r", stereoROffsetMode, "Edit Right-Eye-Only Stereo Offset");
-    bind("default", "stereo", "key-down--c", sourceStereoOffsetMode, "Edit Source/Clip Stereo Offset");
-    bind("default", "stereo", "key-down--R", sourceStereoROffsetMode, "Edit Source/Clip Right-Eye-Only Stereo Offset");
-    bind("default", "stereo", "key-down--/", resetStereoOffsets, "Reset Stereo Offsets");
-    bind("default", "stereo", "key-down--alt--s", releaseStereo, "Turn Off Stereo Keys");
+    bind("default", "stereo", "key-down--a", categoryAction("", setStereo("anaglyph")), "Anaglyph Mode");
+    bind("default", "stereo", "key-down--l", categoryAction("", setStereo("lumanaglyph")), "Luminance Anaglyph Mode");
+    bind("default", "stereo", "key-down--d", categoryAction("", setStereo("checker")), "Checked Stereo Mode");
+    bind("default", "stereo", "key-down--k", categoryAction("", setStereo("scanline")), "Scanline Stereo Mode");
+    bind("default", "stereo", "key-down--s", categoryAction("", setStereo("pair")), "Side-by-Side Stereo Mode");
+    bind("default", "stereo", "key-down--p", categoryAction("", setStereo("pair")), "Side-by-Side Stereo Mode");
+    bind("default", "stereo", "key-down--m", categoryAction("", setStereo("mirror")), "Mirrored Side-by-Side Stereo Mode");
+    bind("default", "stereo", "key-down--z", categoryAction("", setStereo("hsqueezed")), "Horizontal Squeezed Stereo Mode");
+    bind("default", "stereo", "key-down--v", categoryAction("", setStereo("vsqueezed")), "Vertical Squeezed Stereo Mode");
+    bind("default", "stereo", "key-down--h", categoryAction("", setStereo("hardware")), "Hardware Stereo Mode");
+    bind("default", "stereo", "key-down--,", categoryAction("", setStereo("left")), "Left Eye Only Stereo Mode");
+    bind("default", "stereo", "key-down--.", categoryAction("", setStereo("right")), "Right Eye Only Stereo Mode");
+    bind("default", "stereo", "key-down--<", categoryAction("", setStereo("left")), "Left Eye Only Stereo Mode");
+    bind("default", "stereo", "key-down-->", categoryAction("", setStereo("right")), "Right Eye Only Stereo Mode");
+    bind("default", "stereo", "key-down--O", categoryAction("", setStereo("off")), "Stereo Off");
+    bind("default", "stereo", "key-down--S", categoryAction("", toggleSwapEyes), "Swap Eyes");
+    bind("default", "stereo", "key-down--o", categoryAction("", stereoOffsetMode), "Edit Stereo Offset");
+    bind("default", "stereo", "key-down--r", categoryAction("", stereoROffsetMode), "Edit Right-Eye-Only Stereo Offset");
+    bind("default", "stereo", "key-down--c", categoryAction("", sourceStereoOffsetMode), "Edit Source/Clip Stereo Offset");
+    bind("default", "stereo", "key-down--R", categoryAction("", sourceStereoROffsetMode), "Edit Source/Clip Right-Eye-Only Stereo Offset");
+    bind("default", "stereo", "key-down--/", categoryAction("", resetStereoOffsets), "Reset Stereo Offsets");
+    bind("default", "stereo", "key-down--alt--s", categoryAction("", releaseStereo), "Turn Off Stereo Keys");
 
-    bind("key-down--alt--s", \: (void; Event ev)
+    bind("key-down--alt--s", categoryAction("", \: (void; Event ev)
     {
         displayFeedback("Stereo Keys (a, d, s, h, <, >, m, S, o, toggle off)...", 10e6);
         redraw();
         pushEventTable("stereo");
-    }, "Turn On Stereo Keys");
+    }), "Turn On Stereo Keys");
 
-    bind("default", "nudge", "key-down--right", nudge(-.01,0,1), "Nudge Right");
-    bind("default", "nudge", "key-down--left", nudge(.01,0,1), "Nudge Left");
-    bind("default", "nudge", "key-down--up", nudge(0,-.01,1), "Nudge Up");
-    bind("default", "nudge", "key-down--down", nudge(0,.01,1), "Nudge Down");
-    bind("default", "nudge", "key-down--control--right", nudge(-0.001,0,1), "Nudge Right Tiny");
-    bind("default", "nudge", "key-down--control--left", nudge(0.001,0,1), "Nudge Left Tiny");
-    bind("default", "nudge", "key-down--control--up", nudge(0,-.001,1), "Nudge Up Tiny");
-    bind("default", "nudge", "key-down--control--down", nudge(0,.001,1), "Nudge Down Tiny");
-    bind("default", "nudge", "key-down--shift--right", nudge(-.1,0,1), "Nudge Right Big");
-    bind("default", "nudge", "key-down--shift--left", nudge(.1,0,1), "Nudge Left Big");
-    bind("default", "nudge", "key-down--shift--up", nudge(0,-.1,1), "Nudge Up Big");
-    bind("default", "nudge", "key-down--shift--down", nudge(0,.1,1), "Nudge Down Big");
-    bind("default", "nudge", "key-down--z", nudge(0,0,1.1), "Nudge Zoom-In");
-    bind("default", "nudge", "key-down--control--z", nudge(0,0,1.01), "Nudge Big Zoom-Out");
-    bind("default", "nudge", "key-down--alt--n", releaseNudge, "Turn Off Nudge Keys");
+    bind("default", "nudge", "key-down--right", categoryAction("", nudge(-.01,0,1)), "Nudge Right");
+    bind("default", "nudge", "key-down--left", categoryAction("", nudge(.01,0,1)), "Nudge Left");
+    bind("default", "nudge", "key-down--up", categoryAction("", nudge(0,-.01,1)), "Nudge Up");
+    bind("default", "nudge", "key-down--down", categoryAction("", nudge(0,.01,1)), "Nudge Down");
+    bind("default", "nudge", "key-down--control--right", categoryAction("", nudge(-0.001,0,1)), "Nudge Right Tiny");
+    bind("default", "nudge", "key-down--control--left", categoryAction("", nudge(0.001,0,1)), "Nudge Left Tiny");
+    bind("default", "nudge", "key-down--control--up", categoryAction("", nudge(0,-.001,1)), "Nudge Up Tiny");
+    bind("default", "nudge", "key-down--control--down", categoryAction("", nudge(0,.001,1)), "Nudge Down Tiny");
+    bind("default", "nudge", "key-down--shift--right", categoryAction("", nudge(-.1,0,1)), "Nudge Right Big");
+    bind("default", "nudge", "key-down--shift--left", categoryAction("", nudge(.1,0,1)), "Nudge Left Big");
+    bind("default", "nudge", "key-down--shift--up", categoryAction("", nudge(0,-.1,1)), "Nudge Up Big");
+    bind("default", "nudge", "key-down--shift--down", categoryAction("", nudge(0,.1,1)), "Nudge Down Big");
+    bind("default", "nudge", "key-down--z", categoryAction("", nudge(0,0,1.1)), "Nudge Zoom-In");
+    bind("default", "nudge", "key-down--control--z", categoryAction("", nudge(0,0,1.01)), "Nudge Big Zoom-Out");
+    bind("default", "nudge", "key-down--alt--n", categoryAction("", releaseNudge), "Turn Off Nudge Keys");
 
-    bind("key-down--alt--n", \: (void; Event ev)
+    bind("key-down--alt--n", categoryAction("", \: (void; Event ev)
     {
         displayFeedback("Nudge Keys (toggle)...", 10e6);
         redraw();
         pushEventTable("nudge");
-    }, "Turn On Nudge Keys");
+    }), "Turn On Nudge Keys");
 
     //-- help
 
     // Since we cannot set the audio cache mode until there is some audio,
     // make sure to set to greedy (scrub on) once we have a source, if the
     // scrubbing state is true.
-    bind("after-progressive-loading", \: (void; Event event)
+    bind("after-progressive-loading", categoryAction("", \: (void; Event event)
     {
         event.reject();
         State s = data();
@@ -7337,22 +7305,22 @@ global bool debugGC = false;
         {
             setAudioCacheMode(CacheGreedy);
         }
-    });
+    }));
 
     //
     //  Handle preferences written by Preferences dialog (C++ side), but
     //  implemented here, in Mu.
     //
     
-    bind("after-preferences-write", updateFromPrefs, "Preferences Updated"); 
+    bind("after-preferences-write", categoryAction("", updateFromPrefs), "Preferences Updated"); 
 
-    bind("before-session-deletion", sessionDeletionHandler, "Session Deletion Requested"); 
+    bind("before-session-deletion", categoryAction("", sessionDeletionHandler), "Session Deletion Requested"); 
 
     //
     //  Handle resetting the matte menus to any saved matte state in the session
     //
 
-    bind("after-session-read", updateStateMatte, "Check Matte Settings in Session");
+    bind("after-session-read", categoryAction("", updateStateMatte), "Check Matte Settings in Session");
 
     //
     //  Scariest event. This will eventually need to have some access

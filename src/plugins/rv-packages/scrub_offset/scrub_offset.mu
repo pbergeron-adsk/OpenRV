@@ -167,8 +167,8 @@ class: ScrubOffset : MinorMode
 		  nil,
                   nil);
 
-	app_utils.bind("default", "scrub-offset-table", "pointer-1--drag", drag, "");
-	app_utils.bind("default", "scrub-offset-table", "pointer-1--release", release, "");
+	app_utils.bind("default", "scrub-offset-table", "pointer-1--drag", app_utils.categoryAction("", drag), "");
+	app_utils.bind("default", "scrub-offset-table", "pointer-1--release", app_utils.categoryAction("", release), "");
     }
 }
 

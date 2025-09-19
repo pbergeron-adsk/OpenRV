@@ -444,10 +444,10 @@ class: Inspector : Widget
         //  These are in the global event table
         //
 
-        bind("pointer-1--shift--drag", sampleAtPoint(this,), "Move Inspector");
-        bind("pointer-1--shift--push", beginSampling(this,), "Show Inspector");
-        bind("stylus-pen--shift--drag", sampleAtPoint(this,), "Move Inspector");
-        bind("stylus-pen--shift--push", beginSampling(this,), "Show Inspector");
+        bind("pointer-1--shift--drag", categoryAction("", sampleAtPoint(this,)), "Move Inspector");
+        bind("pointer-1--shift--push", categoryAction("", beginSampling(this,)), "Show Inspector");
+        bind("stylus-pen--shift--drag", categoryAction("", sampleAtPoint(this,)), "Move Inspector");
+        bind("stylus-pen--shift--push", categoryAction("", beginSampling(this,)), "Show Inspector");
 
         try
         {
