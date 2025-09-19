@@ -842,26 +842,26 @@ class: Timeline : Widget
         Menu lastHalf = Menu {
             {"_", nil},
             {"Time/Frame Display", nil, nil, disabledItem},
-            {"   Global Frame Numbers", setFrameDisplay(2,), nil, categoryState("", isDisplayFormat(2))},
-            {"   Source Frame Numbers", setFrameDisplay(0,), nil, categoryState("", isDisplayFormat(0))},
-            {"   Global Time Code Display", setFrameDisplay(1,), nil, categoryState("", isDisplayFormat(1))},
-            {"   Source Time Code Display", setFrameDisplay(4,), nil, categoryState("", isDisplayFormat(4))},
-            {"   Global Seconds", setFrameDisplay(5,), nil, categoryState("", isDisplayFormat(5))},
-            {"   Footage Display", setFrameDisplay(3,), nil, categoryState("", isDisplayFormat(3))},
+            {"   Global Frame Numbers", setFrameDisplay(2,), nil, categoryState("tbd", isDisplayFormat(2))},
+            {"   Source Frame Numbers", setFrameDisplay(0,), nil, categoryState("tbd", isDisplayFormat(0))},
+            {"   Global Time Code Display", setFrameDisplay(1,), nil, categoryState("tbd", isDisplayFormat(1))},
+            {"   Source Time Code Display", setFrameDisplay(4,), nil, categoryState("tbd", isDisplayFormat(4))},
+            {"   Global Seconds", setFrameDisplay(5,), nil, categoryState("tbd", isDisplayFormat(5))},
+            {"   Footage Display", setFrameDisplay(3,), nil, categoryState("tbd", isDisplayFormat(3))},
             {"_", nil},
             {"Configure", Menu {
-                {"Show Play Controls", optShowVCRButtons, nil, categoryState("", isShowingVCRButtons)},
-                {"Draw Timeline Over Imagery", optDrawTimelineOverImagery, nil, categoryState("", isDrawingTimelineOverImagery)},
-                {"Position Timeline At Top", optDrawTimelineAtTopOfView, nil, categoryState("", isDrawingTimelineAtTopOfView)},
-                {"Show In/Out Frame Numbers", optShowInOutTime, nil, categoryState("", isShowingInOutTime)},
-                {"Step Wraps At In/Out", optStepWraps, nil, categoryState("", isStepWrapping)},
-                {"Scrub Stops At In/Out", optScrubClamps, nil, categoryState("", isScrubClamping)},
-                {"Show Source/Input at Frame", optInputName, nil, categoryState("", isShowingInputName)},
-                {"Show Play Direction Indicator", optShowFrameDirection, nil, categoryState("", isShowingFrameDirection)},
+                {"Show Play Controls", optShowVCRButtons, nil, categoryState("info", isShowingVCRButtons)},
+                {"Draw Timeline Over Imagery", optDrawTimelineOverImagery, nil, categoryState("info", isDrawingTimelineOverImagery)},
+                {"Position Timeline At Top", optDrawTimelineAtTopOfView, nil, categoryState("info", isDrawingTimelineAtTopOfView)},
+                {"Show In/Out Frame Numbers", optShowInOutTime, nil, categoryState("info", isShowingInOutTime)},
+                {"Step Wraps At In/Out", optStepWraps, nil, categoryState("tbd", isStepWrapping)},
+                {"Scrub Stops At In/Out", optScrubClamps, nil, categoryState("tbd", isScrubClamping)},
+                {"Show Source/Input at Frame", optInputName, nil, categoryState("info", isShowingInputName)},
+                {"Show Play Direction Indicator", optShowFrameDirection, nil, categoryState("info", isShowingFrameDirection)},
                 }
             }};
 
-        Menu mbpsMenu = Menu {{"Reset MBPS", doResetMbps, nil, categoryState("")}};
+        Menu mbpsMenu = Menu {{"Reset MBPS", doResetMbps, nil, categoryState("tbd")}};
 
         if ( pointerWasInTimeline &&
             _phantomFrame >= fs &&
@@ -875,11 +875,11 @@ class: Timeline : Widget
                 {title, nil, nil, disabledItem},
                 {media, nil, nil, disabledItem},
                 {"_", nil},
-                {"Set In Frame to %s" % fname, phantomSetInPoint, nil, categoryState("")},
-                {"Set Out Frame to %s" % fname, phantomSetOutPoint, nil, categoryState("")},
-                {"Clear In/Out Frames", clearInOut, nil, categoryState("")},
-                {"Mark Frame %s" % fname, phantomMarkFrame, nil, categoryState("")},
-                {"Clear Marks", doClearAllMarks, nil, categoryState("")}};
+                {"Set In Frame to %s" % fname, phantomSetInPoint, nil, categoryState("mark")},
+                {"Set Out Frame to %s" % fname, phantomSetOutPoint, nil, categoryState("mark")},
+                {"Clear In/Out Frames", clearInOut, nil, categoryState("mark")},
+                {"Mark Frame %s" % fname, phantomMarkFrame, nil, categoryState("mark")},
+                {"Clear Marks", doClearAllMarks, nil, categoryState("mark")}};
 
             Menu all;
             if (_displayMbps) all = combine (firstHalfA, combine (mbpsMenu, lastHalf));
@@ -892,11 +892,11 @@ class: Timeline : Widget
             Menu firstHalfB = Menu {
                 {"Timeline", nil, nil, \: (int;) { DisabledMenuState; }},
                 {"_", nil},
-                {"Set In Frame to Current", currentSetInPoint},
-                {"Set Out Frame to Current", currentSetOutPoint},
-                {"Clear In/Out Frames", clearInOut},
-                {"Mark Current Frame", currentMarkFrame},
-                {"Clear Marks", doClearAllMarks}};
+                {"Set In Frame to Current", currentSetInPoint, categoryState("mark")}, tbd
+                {"Set Out Frame to Current", currentSetOutPoint, categoryState("mark")},
+                {"Clear In/Out Frames", clearInOut, categoryState("mark")},
+                {"Mark Current Frame", currentMarkFrame, categoryState("mark")},
+                {"Clear Marks", doClearAllMarks, categoryState("mark")}};
 
             Menu all;
             if (_displayMbps) all = combine (firstHalfB, combine (mbpsMenu, lastHalf));
