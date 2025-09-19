@@ -163,12 +163,12 @@ class: ScrubOffset : MinorMode
 	_startPos = Point {0, 0};
 
         this.init(name,
-		  [ ("pointer-1--push", push,  "") ],
+		  [ ("pointer-1--push", app_utils.categoryAction("media", push),  "") ],
 		  nil,
                   nil);
 
-	app_utils.bind("default", "scrub-offset-table", "pointer-1--drag", app_utils.categoryAction("", drag), "");
-	app_utils.bind("default", "scrub-offset-table", "pointer-1--release", app_utils.categoryAction("", release), "");
+	app_utils.bind("default", "scrub-offset-table", "pointer-1--drag", app_utils.categoryAction("media", drag), "");
+	app_utils.bind("default", "scrub-offset-table", "pointer-1--release", app_utils.categoryAction("media", release), "");
     }
 }
 
