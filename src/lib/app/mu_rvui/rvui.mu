@@ -78,6 +78,39 @@ global Configuration globalConfig =
 //  Utilities
 //
 
+//
+// Menuitem and bind() category checking functions
+//
+
+\: nilStateFunc (int;) { return NeutralMenuState; }
+\: nilEventFunc (void; Event ev) {;}
+
+\: categoryState (MenuStateFunc; string category, MenuStateFunc stateFunc = nilStateFunc)
+{
+    \: (int;)
+    {
+        bool blocked = isBlockedActionCategory(category);
+        
+        if (blocked) 
+            return DisabledMenuState;
+        else 
+            return stateFunc();
+    };
+}
+
+\: categoryAction ((void;Event); string category, (void;Event) actionFunc = nilEventFunc)
+{
+    \: (void; Event ev)
+    {
+        if (isBlockedActionCategory(category)) {
+            sendInternalEvent("blocked-action-category");
+            return;
+        }
+        actionFunc(ev);
+    };
+}
+
+
 \: makeStateFunc (MenuStateFunc; BoolFunc f)
 {
     \: (int;) { if f() then CheckedMenuState else UncheckedMenuState; };

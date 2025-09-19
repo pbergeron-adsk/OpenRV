@@ -4157,6 +4157,34 @@ namespace IPMu
         NODE_RETURN(s->filterLiveReviewEvents());
     }
 
+    NODE_IMPLEMENTATION(blockActionCategory, void)
+    {
+        Session* s = Session::currentSession();
+        StringType::String* category = NODE_ARG_OBJECT(0, StringType::String);
+        if (category)
+        {
+            s->blockActionCategory(category->c_str());
+        }
+    }
+
+    NODE_IMPLEMENTATION(unblockActionCategory, void)
+    {
+        Session* s = Session::currentSession();
+        StringType::String* category = NODE_ARG_OBJECT(0, StringType::String);
+        if (category)
+        {
+            s->unblockActionCategory(category->c_str());
+        }
+    }
+
+    NODE_IMPLEMENTATION(isBlockedActionCategory, bool)
+    {
+        Session* s = Session::currentSession();
+        StringType::String* category = NODE_ARG_OBJECT(0, StringType::String);
+        NODE_RETURN(category ? s->isBlockedActionCategory(category->c_str())
+                             : false);
+    }
+
     NODE_IMPLEMENTATION(nextViewNode, Pointer)
     {
         Session* s = Session::currentSession();
@@ -6416,6 +6444,18 @@ namespace IPMu
 
             new Function(c, "filterLiveReviewEvents", filterLiveReviewEvents,
                          None, Return, "bool", End),
+
+            new Function(c, "blockActionCategory", blockActionCategory, None,
+                         Return, "void", Parameters,
+                         new Param(c, "category", "string"), End),
+
+            new Function(c, "unblockActionCategory", unblockActionCategory,
+                         None, Return, "void", Parameters,
+                         new Param(c, "category", "string"), End),
+
+            new Function(c, "isBlockedActionCategory", isBlockedActionCategory,
+                         None, Return, "bool", Parameters,
+                         new Param(c, "category", "string"), End),
 
             new Function(c, "previousViewNode", previousViewNode, None, Return,
                          "string", End),

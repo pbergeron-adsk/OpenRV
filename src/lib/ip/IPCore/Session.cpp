@@ -727,6 +727,46 @@ namespace IPCore
 
     bool Session::filterLiveReviewEvents() { return m_filterLiveReviewEvents; }
 
+    void Session::blockActionCategory(const std::string& category)
+    {
+        // Don't block empty category (legacy commands)
+        if (category.empty())
+            return;
+
+        // Don't add duplicates
+        if (std::find(m_blockedActionCategories.begin(),
+                      m_blockedActionCategories.end(), category)
+            == m_blockedActionCategories.end())
+        {
+            m_blockedActionCategories.push_back(category);
+        }
+    }
+
+    void Session::unblockActionCategory(const std::string& category)
+    {
+        // Don't block empty category (legacy commands)
+        if (category.empty())
+            return;
+
+        auto it = std::find(m_blockedActionCategories.begin(),
+                            m_blockedActionCategories.end(), category);
+        if (it != m_blockedActionCategories.end())
+        {
+            m_blockedActionCategories.erase(it);
+        }
+    }
+
+    bool Session::isBlockedActionCategory(const std::string& category) const
+    {
+        // Empty category (legacy commands) is never blocked
+        if (category.empty())
+            return false;
+
+        return std::find(m_blockedActionCategories.begin(),
+                         m_blockedActionCategories.end(), category)
+               != m_blockedActionCategories.end();
+    }
+
     void Session::setName(const string& n) { m_name = n; }
 
     string Session::name() const { return m_name; }
