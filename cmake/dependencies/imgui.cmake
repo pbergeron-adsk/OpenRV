@@ -173,3 +173,9 @@ TARGET_INCLUDE_DIRECTORIES(
 )
 
 LIST(APPEND RV_DEPS_LIST imgui::imgui)
+
+# Set version for about dialog
+SET(RV_DEPS_IMGUI_VERSION
+    ${_version}
+    CACHE INTERNAL "" FORCE
+)
